@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Docker Reference — Beginner to Advanced</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --bg-2: #0f1424;
+    --panel: rgba(20, 26, 44, 0.6);
+    --panel-solid: #141a2c;
+    --border: rgba(255, 255, 255, 0.08);
+    --border-strong: rgba(255, 255, 255, 0.14);
+    --text: #e8ecf5;
+    --text-2: #b8c0d4;
+    --muted: #7a8398;
+    --accent: #0db7ed;
+    --accent-2: #2496ed;
+    --accent-3: #7c3aed;
+    --grad-1: linear-gradient(135deg, #0db7ed 0%, #2496ed 50%, #7c3aed 100%);
+    --grad-2: linear-gradient(135deg, #2496ed 0%, #7c3aed 100%);
+    --pro: #f59e0b;
+    --pro-soft: rgba(245, 158, 11, 0.10);
+    --warn: #ef4444;
+    --good: #10b981;
+    --code-bg: #060912;
+    --code-border: rgba(255, 255, 255, 0.06);
+    --shadow-lg: 0 24px 48px -12px rgba(0, 0, 0, 0.5);
+    --shadow-glow: 0 0 60px rgba(36, 150, 237, 0.25);
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  /* Ambient background glow */
+  body::before {
+    content: '';
+    position: fixed;
+    top: -20%; left: -10%;
+    width: 60%; height: 60%;
+    background: radial-gradient(circle, rgba(13, 183, 237, 0.15) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    bottom: -20%; right: -10%;
+    width: 60%; height: 60%;
+    background: radial-gradient(circle, rgba(124, 58, 237, 0.12) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  a { color: var(--accent); text-decoration: none; transition: color 0.2s; }
+  a:hover { color: var(--accent-2); }
+
+  /* Layout */
+  .layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    min-height: 100vh;
+    position: relative;
+    z-index: 1;
+  }
+  @media (max-width: 1024px) {
+    .layout { grid-template-columns: 1fr; }
+    aside { position: relative !important; height: auto !important; max-height: none; }
+  }
+
+  /* Sidebar */
+  aside {
+    background: rgba(15, 20, 36, 0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-right: 1px solid var(--border);
+    padding: 28px 20px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+  aside::-webkit-scrollbar { width: 6px; }
+  aside::-webkit-scrollbar-track { background: transparent; }
+  aside::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+
+  .brand {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 6px;
+  }
+  .brand-logo {
+    width: 36px; height: 36px;
+    background: var(--grad-1);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    box-shadow: 0 8px 16px rgba(36, 150, 237, 0.3);
+  }
+  .brand-text { font-size: 16px; font-weight: 700; letter-spacing: -0.01em; }
+  .brand-sub { font-size: 11px; color: var(--muted); margin-left: 46px; margin-bottom: 24px; letter-spacing: 0.02em; }
+
+  aside nav a {
+    display: block;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 13.5px;
+    color: var(--text-2);
+    margin-bottom: 2px;
+    transition: all 0.2s;
+    border-left: 2px solid transparent;
+  }
+  aside nav a:hover {
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text);
+    text-decoration: none;
+  }
+  aside nav a.section {
+    font-weight: 700;
+    font-size: 10.5px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-top: 18px;
+    margin-bottom: 6px;
+  }
+  aside nav a.pro-link { color: var(--pro); }
+
+  /* Main content */
+  main {
+    max-width: 980px;
+    padding: 56px 56px 96px;
+    margin: 0 auto;
+    width: 100%;
+  }
+  @media (max-width: 600px) { main { padding: 32px 20px 64px; } }
+
+  /* Hero */
+  .hero {
+    text-align: left;
+    padding: 40px 0 56px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 48px;
+    position: relative;
+  }
+  .hero-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    background: rgba(13, 183, 237, 0.10);
+    border: 1px solid rgba(13, 183, 237, 0.25);
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 20px;
+    letter-spacing: 0.02em;
+  }
+  .hero-eyebrow::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--accent);
+  }
+  .hero h1 {
+    font-size: clamp(36px, 5vw, 56px);
+    font-weight: 800;
+    margin: 0 0 16px;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    background: linear-gradient(180deg, #ffffff 0%, #b8c0d4 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .hero h1 span {
+    background: var(--grad-1);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .hero p {
+    font-size: 18px;
+    color: var(--text-2);
+    max-width: 640px;
+    margin: 0 0 28px;
+  }
+  .level-pills { display: flex; gap: 10px; flex-wrap: wrap; }
+  .level-pills a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-2);
+    transition: all 0.2s;
+    backdrop-filter: blur(10px);
+  }
+  .level-pills a:hover {
+    border-color: var(--accent);
+    color: var(--text);
+    transform: translateY(-1px);
+    text-decoration: none;
+    box-shadow: 0 8px 20px rgba(13, 183, 237, 0.15);
+  }
+
+  /* Section headings */
+  h2 {
+    font-size: 30px;
+    font-weight: 700;
+    margin: 64px 0 20px;
+    padding-top: 24px;
+    letter-spacing: -0.02em;
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  h2::before {
+    content: '';
+    width: 4px;
+    height: 28px;
+    background: var(--grad-1);
+    border-radius: 2px;
+  }
+  h2:first-of-type { border-top: none; padding-top: 0; }
+  h3 {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 36px 0 12px;
+    letter-spacing: -0.01em;
+    color: var(--text);
+  }
+  h3 .anchor-icon {
+    font-size: 14px;
+    color: var(--accent);
+    margin-right: 8px;
+  }
+  h4 {
+    font-size: 15px;
+    font-weight: 600;
+    margin: 24px 0 8px;
+    color: var(--text-2);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  p { margin: 8px 0 14px; color: var(--text-2); }
+  ul, ol { padding-left: 22px; color: var(--text-2); }
+  li { margin: 6px 0; }
+  li::marker { color: var(--accent); }
+
+  /* Callouts */
+  .callout {
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    background: rgba(13, 183, 237, 0.06);
+    padding: 14px 18px;
+    border-radius: 10px;
+    margin: 20px 0;
+    font-size: 14px;
+    color: var(--text-2);
+    backdrop-filter: blur(8px);
+  }
+  .callout strong { color: var(--accent); font-weight: 600; }
+  .callout.pro { border-left-color: var(--pro); background: var(--pro-soft); }
+  .callout.pro strong { color: var(--pro); }
+  .callout.warn { border-left-color: var(--warn); background: rgba(239, 68, 68, 0.06); }
+  .callout.warn strong { color: var(--warn); }
+
+  /* Code */
+  code {
+    font-family: 'JetBrains Mono', 'SF Mono', Menlo, monospace;
+    font-size: 0.88em;
+  }
+  :not(pre) > code {
+    background: rgba(124, 58, 237, 0.12);
+    color: #c4b5fd;
+    padding: 2px 7px;
+    border-radius: 5px;
+    font-weight: 500;
+    border: 1px solid rgba(124, 58, 237, 0.20);
+  }
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--code-border);
+    border-radius: 12px;
+    padding: 18px 20px;
+    overflow-x: auto;
+    margin: 16px 0 24px;
+    position: relative;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  }
+  pre::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(13, 183, 237, 0.4), transparent);
+  }
+  pre code { color: #e6edf3; line-height: 1.6; }
+  pre code .comment { color: #6b7280; font-style: italic; }
+  pre code .keyword { color: #c084fc; }
+  pre code .string { color: #86efac; }
+  pre code .flag { color: #fbbf24; }
+  pre code .number { color: #f472b6; }
+
+  .copy-btn {
+    position: absolute;
+    top: 12px; right: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-2);
+    border: 1px solid var(--border-strong);
+    border-radius: 6px;
+    padding: 5px 11px;
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Inter', sans-serif;
+  }
+  .copy-btn:hover {
+    background: rgba(13, 183, 237, 0.15);
+    border-color: var(--accent);
+    color: var(--text);
+  }
+  .copy-btn.copied {
+    background: var(--good);
+    border-color: var(--good);
+    color: #fff;
+  }
+
+  /* Tables */
+  .table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin: 16px 0 24px;
+    background: var(--panel);
+    backdrop-filter: blur(10px);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+  th, td {
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  th {
+    background: rgba(255, 255, 255, 0.03);
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255, 255, 255, 0.02); }
+
+  /* Pro tips */
+  .pro-tip {
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    border-left: 3px solid var(--pro);
+    background: var(--pro-soft);
+    backdrop-filter: blur(8px);
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin: 16px 0;
+    font-size: 14px;
+    color: var(--text-2);
+    transition: all 0.2s;
+  }
+  .pro-tip:hover {
+    border-color: rgba(245, 158, 11, 0.5);
+    transform: translateX(2px);
+  }
+  .pro-tip::before {
+    content: '⚡ Pro Tip';
+    color: var(--pro);
+    font-weight: 700;
+    display: block;
+    margin-bottom: 4px;
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  /* Section cards for the hero levels */
+  .level-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin: 24px 0 40px;
+  }
+  .level-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .level-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--grad-1);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s;
+  }
+  .level-card:hover {
+    border-color: var(--border-strong);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+  }
+  .level-card:hover::before { transform: scaleX(1); }
+  .level-card h4 {
+    margin: 0 0 6px;
+    color: var(--text);
+    text-transform: none;
+    letter-spacing: -0.01em;
+    font-size: 16px;
+  }
+  .level-card p {
+    margin: 0;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .level-card .emoji { font-size: 24px; margin-bottom: 8px; display: block; }
+
+  footer {
+    color: var(--muted);
+    font-size: 12px;
+    border-top: 1px solid var(--border);
+    margin-top: 80px;
+    padding-top: 24px;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside>
+    <div class="brand">
+      <div class="brand-logo">🐳</div>
+      <div class="brand-text">Docker Reference</div>
+    </div>
+    <div class="brand-sub">Beginner → Advanced</div>
+    <nav>
+      <a class="section" href="#top">Overview</a>
+      <a href="#intro">Introduction</a>
+      <a href="#install">Installation</a>
+
+      <a class="section" href="#beginner">Beginner</a>
+      <a href="#concepts">Core Concepts</a>
+      <a href="#first-container">First Container</a>
+      <a href="#images">Working with Images</a>
+      <a href="#dockerfile">Writing a Dockerfile</a>
+      <a href="#volumes">Volumes &amp; Data</a>
+      <a href="#networking">Networking Basics</a>
+
+      <a class="section" href="#intermediate">Intermediate</a>
+      <a href="#compose">Docker Compose</a>
+      <a href="#multi-stage">Multi-stage Builds</a>
+      <a href="#registry">Registries</a>
+      <a href="#env">Configuration</a>
+      <a href="#healthchecks">Healthchecks</a>
+
+      <a class="section" href="#advanced">Advanced</a>
+      <a href="#security">Security Hardening</a>
+      <a href="#performance">Image Size &amp; Performance</a>
+      <a href="#debugging">Debugging</a>
+      <a href="#dockerignore">.dockerignore</a>
+      <a href="#buildkit">BuildKit &amp; Cache</a>
+      <a href="#networks-advanced">Advanced Networking</a>
+
+      <a class="section pro-link" href="#pro-tips">Pro Tips</a>
+      <a class="section" href="#cheatsheet">Cheatsheet</a>
+    </nav>
+  </aside>
+
+  <main>
+    <header id="top" class="hero">
+      <div class="hero-eyebrow">v1.0 · Updated 2026</div>
+      <h1>Master <span>Docker</span><br>From zero to production.</h1>
+      <p>A practical, end-to-end reference for learning containerization. Start at the top and work your way down — or jump in anywhere with the sidebar.</p>
+      <div class="level-pills">
+        <a href="#beginner">🟢 Beginner</a>
+        <a href="#intermediate">🟡 Intermediate</a>
+        <a href="#advanced">🔴 Advanced</a>
+        <a href="#pro-tips">⚡ Pro Tips</a>
+        <a href="#cheatsheet">📋 Cheatsheet</a>
+      </div>
+    </header>
+
+    <section class="level-section">
+      <div class="level-card">
+        <span class="emoji">🟢</span>
+        <h4>Beginner</h4>
+        <p>Core concepts, your first container, Dockerfile basics, volumes, and networking fundamentals.</p>
+      </div>
+      <div class="level-card">
+        <span class="emoji">🟡</span>
+        <h4>Intermediate</h4>
+        <p>Compose, multi-stage builds, registries, configuration management, and healthchecks.</p>
+      </div>
+      <div class="level-card">
+        <span class="emoji">🔴</span>
+        <h4>Advanced</h4>
+        <p>Security hardening, performance tuning, debugging, BuildKit, and production patterns.</p>
+      </div>
+    </section>
+
+    <!-- ========== OVERVIEW ========== -->
+    <section id="intro">
+      <h2>What is Docker?</h2>
+      <p>Docker packages an application and its dependencies into a standardized unit called a <strong>container</strong>. Containers share the host OS kernel but run in isolated user-space, making them lightweight, fast, and reproducible across environments.</p>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>Aspect</th><th>Containers</th><th>Virtual Machines</th></tr></thead>
+        <tbody>
+          <tr><td>Boot time</td><td>Milliseconds</td><td>Seconds to minutes</td></tr>
+          <tr><td>Size</td><td>MBs</td><td>GBs</td></tr>
+          <tr><td>OS overhead</td><td>Shares host kernel</td><td>Runs full guest OS</td></tr>
+          <tr><td>Isolation</td><td>Process-level</td><td>Hardware-level</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </section>
+
+    <section id="install">
+      <h2>Installation</h2>
+      <p>Docker Engine runs on Linux, macOS, and Windows (via WSL2).</p>
+      <h3>Linux (Ubuntu/Debian)</h3>
+      <pre><button class="copy-btn">Copy</button><code>curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
+sudo usermod -aG docker $USER   <span class="comment"># log out/in after this</span>
+docker --version</code></pre>
+      <h3>macOS / Windows</h3>
+      <p>Install <strong>Docker Desktop</strong> from <a href="https://www.docker.com/products/docker-desktop/">docker.com</a>. It bundles the engine, CLI, Compose, and a lightweight VM.</p>
+      <div class="callout"><strong>Verify:</strong> run <code>docker run hello-world</code> — it pulls a tiny image and prints a success message.</div>
+    </section>
+
+    <!-- ========== BEGINNER ========== -->
+    <section id="beginner">
+      <h2>🟢 Beginner</h2>
+
+      <h3 id="concepts">Core Concepts</h3>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>Term</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Image</strong></td><td>Read-only template with your app + dependencies. Built from a Dockerfile.</td></tr>
+          <tr><td><strong>Container</strong></td><td>A running instance of an image.</td></tr>
+          <tr><td><strong>Dockerfile</strong></td><td>Recipe file describing how to build an image.</td></tr>
+          <tr><td><strong>Registry</strong></td><td>Storage for images (Docker Hub, GHCR, ECR, etc.).</td></tr>
+          <tr><td><strong>Volume</strong></td><td>Persistent storage mounted into a container.</td></tr>
+          <tr><td><strong>Network</strong></td><td>Virtual network connecting containers.</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <h3 id="first-container">Your First Container</h3>
+      <pre><button class="copy-btn">Copy</button><code><span class="comment"># Run an interactive shell in a Ubuntu container</span>
+docker run -it --rm ubuntu:latest bash
+
+<span class="comment"># Run a detached nginx web server</span>
+docker run -d --name web -p <span class="number">8080</span>:<span class="number">80</span> nginx:latest
+<span class="comment"># open http://localhost:8080</span>
+
+docker ps                <span class="comment"># list running containers</span>
+docker stop web          <span class="comment"># stop it</span>
+docker rm web            <span class="comment"># remove the stopped container</span></code></pre>
+      <div class="callout"><strong>Flags explained:</strong> <code>-d</code> detached (background), <code>-it</code> interactive TTY, <code>--rm</code> auto-remove when stopped, <code>-p HOST:CONT</code> port mapping.</div>
+
+      <h3 id="images">Working with Images</h3>
+      <pre><button class="copy-btn">Copy</button><code>docker images                  <span class="comment"># list local images</span>
+docker pull alpine:<span class="number">3.20</span>        <span class="comment"># download an image</span>
+docker rmi alpine:<span class="number">3.20</span>         <span class="comment"># remove an image</span>
+docker image prune -a          <span class="comment"># remove all unused images</span>
+docker tag myapp:<span class="number">1.0</span> me/myapp:<span class="number">1.0</span>   <span class="comment"># create an alias tag</span></code></pre>
+
+      <h3 id="dockerfile">Writing a Dockerfile</h3>
+      <p>A Dockerfile is a list of instructions. Each instruction creates a layer in the image.</p>
+      <pre><button class="copy-btn">Copy</button><code><span class="comment"># syntax=docker/dockerfile:1.7</span>
+<span class="keyword">FROM</span> node:<span class="number">20</span>-alpine           <span class="comment"># base image</span>
+<span class="keyword">WORKDIR</span> /app                  <span class="comment"># cd into /app for subsequent commands</span>
+<span class="keyword">COPY</span> package*.json ./         <span class="comment"># copy dependency manifests first (better caching)</span>
+<span class="keyword">RUN</span> npm ci --omit=dev         <span class="comment"># install deps</span>
+<span class="keyword">COPY</span> . .                      <span class="comment"># copy source code</span>
+<span class="keyword">ENV</span> NODE_ENV=production
+<span class="keyword">EXPOSE</span> <span class="number">3000</span>
+<span class="keyword">CMD</span> [<span class="string">"node"</span>, <span class="string">"server.js"</span>]     <span class="comment"># default command</span></code></pre>
+      <pre><button class="copy-btn">Copy</button><code>docker build -t myapp:<span class="number">1.0</span> .          <span class="comment"># build from current dir</span>
+docker run -p <span class="number">3000</span>:<span class="number">3000</span> myapp:<span class="number">1.0</span>    <span class="comment"># run it</span></code></pre>
+
+      <h3 id="volumes">Volumes &amp; Data</h3>
+      <p>Containers are ephemeral — data inside is lost when removed. Use <strong>volumes</strong> for persistence.</p>
+      <pre><button class="copy-btn">Copy</button><code><span class="comment"># Named volume (managed by Docker)</span>
+docker volume create db-data
+docker run -d -v db-data:/var/lib/postgresql/data postgres:<span class="number">16</span>
+
+<span class="comment"># Bind mount (a host directory mounted in)</span>
+docker run -d -v $(pwd)/src:/app/src myapp:<span class="number">1.0</span>
+
+docker volume ls
+docker volume inspect db-data</code></pre>
+      <div class="pro-tip">Prefer named volumes over bind mounts for databases — they're easier to back up, migrate, and don't depend on host paths.</div>
+
+      <h3 id="networking">Networking Basics</h3>
+      <pre><button class="copy-btn">Copy</button><code>docker network ls                       <span class="comment"># list networks</span>
+docker network create mynet             <span class="comment"># create a custom bridge</span>
+docker run -d --network mynet --name api myapi:<span class="number">1.0</span>
+docker run -d --network mynet -p <span class="number">8080</span>:<span class="number">80</span> --name web nginx   <span class="comment"># web→api via DNS name "api"</span>
+docker network inspect mynet</code></pre>
+      <div class="callout"><strong>DNS magic:</strong> on a user-defined network, containers resolve each other by name (here, <code>api</code> is reachable from <code>web</code> as <code>http://api:80</code>).</div>
+    </section>
+
+    <!-- ========== INTERMEDIATE ========== -->
+    <section id="intermediate">
+      <h2>🟡 Intermediate</h2>
+
+      <h3 id="compose">Docker Compose</h3>
+      <p>Compose lets you declare multi-container apps in YAML and manage them as one.</p>
+      <pre><button class="copy-btn">Copy</button><code><span class="comment"># docker-compose.yml</span>
+<span class="keyword">services</span>:
+  <span class="keyword">web</span>:
+    <span class="keyword">build</span>: .
+    <span class="keyword">ports</span>:
+      - <span class="string">"8080:80"</span>
+    <span class="keyword">depends_on</span>:
+      - api
+    <span class="keyword">environment</span>:
+      - API_URL=http://api:3000
+
+  <span class="keyword">api</span>:
+    <span class="keyword">build</span>: ./api
+    <span class="keyword">environment</span>:
+      - DATABASE_URL=postgres://user:pass@db:5432/app
+    <span class="keyword">depends_on</span>:
+      <span class="keyword">db</span>:
+        <span class="keyword">condition</span>: service_healthy
+
+  <span class="keyword">db</span>:
+    <span class="keyword">image</span>: postgres:16
+    <span class="keyword">volumes</span>:
+      - db-data:/var/lib/postgresql/data
+    <span class="keyword">environment</span>:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=pass
+      - POSTGRES_DB=app
+    <span class="keyword">healthcheck</span>:
+      <span class="keyword">test</span>: [<span class="string">"CMD-SHELL"</span>, <span class="string">"pg_isready -U user -d app"</span>]
+      <span class="keyword">interval</span>: 5s
+      <span class="keyword">timeout</span>: 3s
+      <span class="keyword">retries</span>: 5
+
+<span class="keyword">volumes</span>:
+  <span class="keyword">db-data</span>:</code></pre>
+      <pre><button class="copy-btn">Copy</button><code>docker compose up -d          <span class="comment"># start</span>
+docker compose ps             <span class="comment"># status</span>
+docker compose logs -f web    <span class="comment"># stream logs</span>
+docker compose exec web sh    <span class="comment"># shell into a service</span>
+docker compose down           <span class="comment"># stop &amp; remove containers/networks</span>
+docker compose down -v        <span class="comment"># also remove volumes</span></code></pre>
+
+      <h3 id="multi-stage">Multi-stage Builds</h3>
+      <p>Use multiple <code>FROM</code> stages to keep build tools out of the final image.</p>
+      <pre><button class="copy-btn">Copy</button><code><span class="comment"># syntax=docker/dockerfile:1.7</span>
+<span class="comment"># ---- build stage ----</span>
+<span class="keyword">FROM</span> golang:<span class="number">1.22</span> <span class="keyword">AS</span> build
+<span class="keyword">WORKDIR</span> /src
+<span class="keyword">COPY</span> go.mod go.sum ./
+<span class="keyword">RUN</span> go mod download
+<span class="keyword">COPY</span> . .
+<span class="keyword">RUN</span> CGO_ENABLED=<span class="number">0</span> go build -o /out/app
+
+<span class="comment"># ---- runtime stage ----</span>
+<span class="keyword">FROM</span> gcr.io/distroless/static-debian12:nonroot
+<span class="keyword">COPY</span> --from=build /out/app /app
+<span class="keyword">USER</span> nonroot:nonroot
+<span class="keyword">ENTRYPOINT</span> [<span class="string">"/app"</span>]</code></pre>
+      <div class="pro-tip">A Go binary from this Dockerfile is ~10–20 MB instead of ~800 MB — and has no shell, no package manager, and a non-root user by default.</div>
+
+      <h3 id="registry">Registries &amp; Push/Pull</h3>
+      <pre><button class="copy-btn">Copy</button><code>docker login                     <span class="comment"># login to default registry (Docker Hub)</span>
+docker login ghcr.io             <span class="comment"># GitHub Container Registry</span>
+docker tag myapp:<span class="number">1.0</span> ghcr.io/me/myapp:<span class="number">1.0</span>
+docker push ghcr.io/me/myapp:<span class="number">1.0</span>
+docker pull ghcr.io/me/myapp:<span class="number">1.0</span>
+docker logout</code></pre>
+      <div class="callout warn"><strong>Don't bake secrets into images.</strong> Anything in a layer is in the image forever — even after you "delete" it in a later layer. Use env vars, secrets, or mount at runtime.</div>
+
+      <h3 id="env">Environment &amp; Configuration</h3>
+      <pre><button class="copy-btn">Copy</button><code><span class="comment"># Pass env vars</span>
+docker run -e NODE_ENV=production -e LOG_LEVEL=info myapp:<span class="number">1.0</span>
+
+<span class="comment"># From a file</span>
+docker run --env-file .env myapp:<span class="number">1.0</span>
+
+<span class="comment"># Use BuildKit secrets at build time (never stored in image)</span>
+<span class="keyword">RUN</span> --mount=type=secret,id=npmrc,target=/root/.npmrc \
+    npm ci</code></pre>
+
+      <h3 id="healthchecks">Healthchecks</h3>
+      <pre><button class="copy-btn">Copy</button><code><span class="keyword">HEALTHCHECK</span> --interval=<span class="number">30</span>s --timeout=<span class="number">3</span>s --start-period=<span class="number">10</span>s --retries=<span class="number">3</span> \
+  <span class="keyword">CMD</span> curl -fsS http://localhost:<span class="number">3000</span>/health || exit <span class="number">1</span></code></pre>
+      <p><code>docker ps</code> shows the <code>(healthy)</code>/<code>(unhealthy)</code> status. Compose can gate service startup on <code>condition: service_healthy</code>.</p>
+    </section>
+
+    <!-- ========== ADVANCED ========== -->
+    <section id="advanced">
+      <h2>🔴 Advanced</h2>
+
+      <h3 id="security">Security Hardening</h3>
+      <ol>
+        <li><strong>Run as non-root.</strong> Add <code>USER</code> in your Dockerfile.</li>
+        <li><strong>Minimal base images.</strong> Prefer <code>alpine</code>, <code>distroless</code>, or <code>scratch</code>.</li>
+        <li><strong>Don't bake secrets.</strong> Use BuildKit secrets, env vars at runtime, or a secret manager.</li>
+        <li><strong>Pin versions.</strong> Avoid <code>latest</code> in production — pin by digest for reproducibility.</li>
+        <li><strong>Read-only filesystems.</strong> <code>docker run --read-only --tmpfs /tmp myapp</code></li>
+        <li><strong>Drop capabilities.</strong> <code>--cap-drop=ALL --cap-add=NET_BIND_SERVICE</code></li>
+        <li><strong>Scan images.</strong> <code>docker scout cves myapp:1.0</code> or <code>trivy image myapp:1.0</code>.</li>
+      </ol>
+      <pre><button class="copy-btn">Copy</button><code>docker run --rm \
+  --read-only \
+  --tmpfs /tmp \
+  --cap-drop=ALL \
+  --security-opt no-new-privileges \
+  --user <span class="number">1000</span>:<span class="number">1000</span> \
+  myapp:<span class="number">1.0</span></code></pre>
+
+      <h3 id="performance">Image Size &amp; Performance</h3>
+      <ul>
+        <li>Order Dockerfile instructions from least to most frequently changing (leverage layer cache).</li>
+        <li>Combine <code>RUN</code> steps; clean package manager caches in the same layer.</li>
+        <li>Use <code>.dockerignore</code> to exclude <code>node_modules</code>, <code>.git</code>, build artifacts.</li>
+        <li>Multi-stage builds to throw away build toolchain.</li>
+        <li>Use <code>slim</code>/<code>alpine</code> base images when feasible.</li>
+      </ul>
+      <pre><button class="copy-btn">Copy</button><code><span class="comment"># Good: single layer, cached</span>
+<span class="keyword">RUN</span> apt-get update &amp;&amp; apt-get install -y --no-install-recommends \
+        curl ca-certificates \
+    &amp;&amp; rm -rf /var/lib/apt/lists/*</code></pre>
+
+      <h3 id="debugging">Debugging &amp; Inspection</h3>
+      <pre><button class="copy-btn">Copy</button><code>docker logs -f --tail <span class="number">100</span> web           <span class="comment"># follow logs</span>
+docker exec -it web sh                 <span class="comment"># shell into a running container</span>
+docker inspect web                     <span class="comment"># full JSON config</span>
+docker stats                           <span class="comment"># live CPU/mem/net</span>
+docker top web                         <span class="comment"># processes inside</span>
+docker diff web                        <span class="comment"># filesystem changes vs image</span>
+docker events --since <span class="number">10</span>m              <span class="comment"># daemon events</span>
+docker system df                       <span class="comment"># disk usage</span>
+docker system prune -a                 <span class="comment"># nuke everything unused</span></code></pre>
+      <p>For a network-level view: <code>docker run --rm -it --network container:web nicolaka/netshoot</code> gives you <code>curl</code>, <code>nslookup</code>, <code>tcpdump</code>, etc.</p>
+
+      <h3 id="dockerignore">.dockerignore</h3>
+      <pre><button class="copy-btn">Copy</button><code><span class="comment"># .dockerignore</span>
+.git
+.gitignore
+node_modules
+dist
+build
+*.md
+.env
+.DS_Store
+Dockerfile
+docker-compose*.yml
+.vscode
+.idea</code></pre>
+
+      <h3 id="buildkit">BuildKit &amp; Cache</h3>
+      <p>BuildKit is the modern builder: parallel builds, better caching, secrets, mounts.</p>
+      <pre><button class="copy-btn">Copy</button><code><span class="comment"># Enable</span>
+export DOCKER_BUILDKIT=<span class="number">1</span>
+
+<span class="comment"># Build with a remote cache (registry)</span>
+docker buildx build \
+  --tag ghcr.io/me/myapp:<span class="number">1.0</span> \
+  --cache-from type=registry,ref=ghcr.io/me/myapp:buildcache \
+  --cache-to   type=registry,ref=ghcr.io/me/myapp:buildcache,mode=max \
+  --push .
+
+<span class="comment"># Mount cache for package managers (huge speedup)</span>
+<span class="keyword">RUN</span> --mount=type=cache,target=/root/.cache/pip \
+    pip install -r requirements.txt</code></pre>
+      <div class="pro-tip">Use <code>--mount=type=cache</code> for <code>pip</code>, <code>npm</code>, <code>go mod</code>, <code>cargo</code> — dependencies survive across builds without bloating the image.</div>
+
+      <h3 id="networks-advanced">Advanced Networking</h3>
+      <ul>
+        <li><strong>bridge</strong> (default): isolated, NAT to host.</li>
+        <li><strong>host</strong>: no isolation, container shares host network stack. Fastest, least safe.</li>
+        <li><strong>none</strong>: no networking — bring your own.</li>
+        <li><strong>overlay</strong>: multi-host networking (Swarm/Kubernetes).</li>
+        <li><strong>macvlan</strong>: container appears as a physical device on your LAN.</li>
+      </ul>
+      <pre><button class="copy-btn">Copy</button><code><span class="comment"># Run with host networking (only when you need max performance and trust the workload)</span>
+docker run --network host nginx
+
+<span class="comment"># Attach a second network to a running container</span>
+docker network connect monitoring web</code></pre>
+    </section>
+
+    <!-- ========== PRO TIPS ========== -->
+    <section id="pro-tips">
+      <h2>⚡ Pro Tips</h2>
+
+      <div class="pro-tip"><strong>Pin by digest for reproducibility.</strong> Tags are mutable; digests aren't. Use <code>node:20-alpine@sha256:&lt;digest&gt;</code> in production.</div>
+
+      <div class="pro-tip"><strong>One process per container.</strong> Compose for multi-service apps. A container doing five things is hard to scale, debug, and update.</div>
+
+      <div class="pro-tip"><strong>Log to stdout/stderr.</strong> Let the Docker logging driver handle aggregation — don't write to files inside the container (they're lost without explicit mounts).</div>
+
+      <div class="pro-tip"><strong>Use exec form for CMD/ENTRYPOINT.</strong> <code>CMD ["node","server.js"]</code> doesn't shell-wrap, so signals (SIGTERM) reach your app for graceful shutdown.</div>
+
+      <div class="pro-tip"><strong>Set a stop grace period.</strong> <code>docker run --stop-timeout 30 ...</code> or in Compose <code>stop_grace_period: 30s</code>. Containers that ignore SIGTERM hang the orchestrator.</div>
+
+      <div class="pro-tip"><strong>Build with <code>--pull</code> in CI.</strong> <code>docker build --pull -t myapp:$CI_SHA .</code> ensures you get the latest base image, not a stale cache.</div>
+
+      <div class="pro-tip"><strong>Use BuildKit secrets and ssh mounts.</strong> Never <code>COPY</code> a token into a layer; mount it at build time and it's not in the image.</div>
+
+      <div class="pro-tip"><strong>Combine <code>HEALTHCHECK</code> with Compose <code>depends_on: condition: service_healthy</code></strong> so dependent services wait for real readiness, not just "process started."</div>
+
+      <div class="pro-tip"><strong>Use <code>docker init</code>.</strong> Docker 24+ scaffolds a sensible <code>.dockerignore</code>, Dockerfile, and Compose file for Node/Python/Go/Java. Great starting point.</div>
+
+      <div class="pro-tip"><strong>Image scanning in CI.</strong> Block merges on HIGH/CRITICAL CVEs: <code>trivy image --exit-code 1 --severity HIGH,CRITICAL myapp:$SHA</code>.</div>
+
+      <div class="pro-tip"><strong>Smaller is safer.</strong> Every extra binary is an extra attack surface and bug surface. distroless/scratch for Go, alpine for Node/Python, slim for Java.</div>
+
+      <div class="pro-tip"><strong>Use <code>docker compose --profile dev up</code></strong> to keep dev-only services (adminer, mailhog) out of production.</div>
+
+      <div class="pro-tip"><strong>Don't <code>docker system prune -a</code> on a shared host.</strong> It removes all stopped containers and unused images — including other people's. Scope it or use <code>--filter</code>.</div>
+
+      <div class="pro-tip"><strong>Resource limits.</strong> Always set <code>--memory</code> and <code>--cpus</code> in production; one runaway container can starve the host.</div>
+    </section>
+
+    <!-- ========== CHEATSHEET ========== -->
+    <section id="cheatsheet">
+      <h2>📋 Cheatsheet</h2>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>Goal</th><th>Command</th></tr></thead>
+        <tbody>
+          <tr><td>List running containers</td><td><code>docker ps</code></td></tr>
+          <tr><td>List all containers</td><td><code>docker ps -a</code></td></tr>
+          <tr><td>List images</td><td><code>docker images</code></td></tr>
+          <tr><td>Run image</td><td><code>docker run -d -p 8080:80 --name web nginx</code></td></tr>
+          <tr><td>Stop / start / restart</td><td><code>docker stop web</code> · <code>docker start web</code> · <code>docker restart web</code></td></tr>
+          <tr><td>Remove container</td><td><code>docker rm -f web</code></td></tr>
+          <tr><td>Shell into container</td><td><code>docker exec -it web sh</code></td></tr>
+          <tr><td>Logs</td><td><code>docker logs -f --tail 100 web</code></td></tr>
+          <tr><td>Build image</td><td><code>docker build -t myapp:1.0 .</code></td></tr>
+          <tr><td>Tag image</td><td><code>docker tag myapp:1.0 me/myapp:1.0</code></td></tr>
+          <tr><td>Push / pull</td><td><code>docker push me/myapp:1.0</code> · <code>docker pull me/myapp:1.0</code></td></tr>
+          <tr><td>Disk usage</td><td><code>docker system df</code></td></tr>
+          <tr><td>Clean up</td><td><code>docker system prune -a --volumes</code></td></tr>
+          <tr><td>Compose up / down</td><td><code>docker compose up -d</code> · <code>docker compose down -v</code></td></tr>
+          <tr><td>Compose logs</td><td><code>docker compose logs -f</code></td></tr>
+        </tbody>
+      </table>
+      </div>
+      <footer>
+        Built as a single self-contained HTML file — no build step, no dependencies. Open in any browser.
+      </footer>
+    </section>
+  </main>
+</div>
+
+<script>
+  // Smooth scroll offset for sticky sidebar
+  document.querySelectorAll('a[href^="#"]').forEach(link => {
+    link.addEventListener('click', e => {
+      const id = link.getAttribute('href').slice(1);
+      const el = document.getElementById(id);
+      if (!el) return;
+      e.preventDefault();
+      window.scrollTo({ top: el.offsetTop - 20, behavior: 'smooth' });
+      history.pushState(null, '', '#' + id);
+    });
+  });
+
+  // Copy buttons
+  document.querySelectorAll('pre').forEach(pre => {
+    const btn = pre.querySelector('.copy-btn');
+    if (!btn) return;
+    btn.addEventListener('click', async () => {
+      const code = pre.querySelector('code');
+      try {
+        await navigator.clipboard.writeText(code.innerText);
+        const original = btn.textContent;
+        btn.textContent = '✓ Copied';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = original; btn.classList.remove('copied'); }, 1400);
+      } catch (e) {
+        btn.textContent = 'Error';
+        setTimeout(() => { btn.textContent = 'Copy'; }, 1400);
+      }
+    });
+  });
+
+  // Reveal sections on scroll
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, { threshold: 0.05, rootMargin: '0px 0px -50px 0px' });
+
+  document.querySelectorAll('section').forEach((s, i) => {
+    s.style.opacity = '0';
+    s.style.transform = 'translateY(12px)';
+    s.style.transition = `opacity 0.6s ease ${Math.min(i * 0.04, 0.4)}s, transform 0.6s ease ${Math.min(i * 0.04, 0.4)}s`;
+    observer.observe(s);
+  });
+
+  // Active nav highlighting
+  const navLinks = document.querySelectorAll('aside nav a[href^="#"]');
+  const sectionMap = new Map();
+  navLinks.forEach(l => {
+    const id = l.getAttribute('href').slice(1);
+    const el = document.getElementById(id);
+    if (el) sectionMap.set(id, l);
+  });
+  const navObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      const link = sectionMap.get(entry.target.id);
+      if (!link) return;
+      if (entry.isIntersecting) {
+        navLinks.forEach(l => l.style.background = '');
+        navLinks.forEach(l => l.style.color = '');
+        link.style.background = 'rgba(13, 183, 237, 0.10)';
+        link.style.color = '#0db7ed';
+      }
+    });
+  }, { rootMargin: '-30% 0px -60% 0px' });
+  sectionMap.forEach((_, id) => navObserver.observe(document.getElementById(id)));
+</script>
+</body>
+</html>
