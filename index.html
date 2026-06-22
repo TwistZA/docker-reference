@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Docker Reference — Beginner to Advanced</title>
+<title>Referencia</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -71,10 +71,14 @@
   /* Layout */
   .layout {
     display: grid;
-    grid-template-columns: 280px 1fr;
+    grid-template-columns: 260px 1fr;
     min-height: 100vh;
     position: relative;
     z-index: 1;
+    transition: grid-template-columns 0.3s ease;
+  }
+  .layout.sidebar-collapsed {
+    grid-template-columns: 64px 1fr;
   }
   @media (max-width: 1024px) {
     .layout { grid-template-columns: 1fr; }
@@ -92,10 +96,66 @@
     top: 0;
     height: 100vh;
     overflow-y: auto;
+    transition: padding 0.3s ease, width 0.3s ease;
+  }
+  .layout.sidebar-collapsed aside {
+    padding: 28px 12px;
   }
   aside::-webkit-scrollbar { width: 6px; }
   aside::-webkit-scrollbar-track { background: transparent; }
   aside::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+
+  /* Sidebar toggle */
+  .sidebar-toggle {
+    position: absolute;
+    top: 28px;
+    right: -12px;
+    width: 24px;
+    height: 24px;
+    background: var(--panel-solid);
+    border: 1px solid var(--border-strong);
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-2);
+    font-size: 12px;
+    transition: all 0.2s;
+    z-index: 10;
+  }
+  .sidebar-toggle:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+  .layout.sidebar-collapsed .sidebar-toggle {
+    transform: rotate(180deg);
+    right: -12px;
+  }
+
+  /* Collapsed sidebar states */
+  .layout.sidebar-collapsed .brand-text,
+  .layout.sidebar-collapsed .brand-sub,
+  .layout.sidebar-collapsed nav a:not(.section),
+  .layout.sidebar-collapsed .section {
+    opacity: 0;
+    width: 0;
+    overflow: hidden;
+    padding: 0;
+    margin: 0;
+  }
+  .layout.sidebar-collapsed .brand {
+    justify-content: center;
+  }
+  .layout.sidebar-collapsed .section {
+    margin-top: 16px;
+  }
+  .layout.sidebar-collapsed .brand-logo {
+    width: 32px;
+    height: 32px;
+    font-size: 18px;
+  }
 
   .brand {
     display: flex; align-items: center; gap: 10px;
@@ -137,11 +197,24 @@
     margin-bottom: 6px;
   }
   aside nav a.pro-link { color: var(--pro); }
+  aside nav a.active {
+    background: rgba(13, 183, 237, 0.10);
+    color: var(--accent);
+  }
+  aside nav a.coming-soon {
+    color: var(--muted);
+    font-style: italic;
+    cursor: default;
+  }
+  aside nav a.coming-soon:hover {
+    background: transparent;
+    color: var(--muted);
+  }
 
   /* Main content */
   main {
-    max-width: 980px;
-    padding: 56px 56px 96px;
+    max-width: 920px;
+    padding: 48px 48px 80px;
     margin: 0 auto;
     width: 100%;
   }
@@ -150,36 +223,15 @@
   /* Hero */
   .hero {
     text-align: left;
-    padding: 40px 0 56px;
+    padding: 32px 0 48px;
     border-bottom: 1px solid var(--border);
-    margin-bottom: 48px;
+    margin-bottom: 40px;
     position: relative;
   }
-  .hero-eyebrow {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 14px;
-    background: rgba(13, 183, 237, 0.10);
-    border: 1px solid rgba(13, 183, 237, 0.25);
-    border-radius: 999px;
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--accent);
-    margin-bottom: 20px;
-    letter-spacing: 0.02em;
-  }
-  .hero-eyebrow::before {
-    content: '';
-    width: 6px; height: 6px;
-    background: var(--accent);
-    border-radius: 50%;
-    box-shadow: 0 0 8px var(--accent);
-  }
   .hero h1 {
-    font-size: clamp(36px, 5vw, 56px);
+    font-size: clamp(32px, 5vw, 48px);
     font-weight: 800;
-    margin: 0 0 16px;
+    margin: 0 0 12px;
     line-height: 1.05;
     letter-spacing: -0.03em;
     background: linear-gradient(180deg, #ffffff 0%, #b8c0d4 100%);
@@ -187,84 +239,185 @@
     background-clip: text;
     -webkit-text-fill-color: transparent;
   }
-  .hero h1 span {
-    background: var(--grad-1);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
   .hero p {
-    font-size: 18px;
+    font-size: 17px;
     color: var(--text-2);
-    max-width: 640px;
-    margin: 0 0 28px;
+    max-width: 600px;
+    margin: 0 0 24px;
   }
-  .level-pills { display: flex; gap: 10px; flex-wrap: wrap; }
-  .level-pills a {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 16px;
+
+  /* Section cards */
+  .section-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+    margin-bottom: 48px;
+  }
+  .section-card {
     background: var(--panel);
     border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px 22px;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+    display: block;
+    text-decoration: none;
+  }
+  .section-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--grad-1);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s;
+  }
+  .section-card:hover {
+    border-color: var(--border-strong);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+    text-decoration: none;
+  }
+  .section-card:hover::before { transform: scaleX(1); }
+  .section-card.coming-soon {
+    opacity: 0.6;
+    cursor: default;
+  }
+  .section-card.coming-soon:hover {
+    transform: none;
+    box-shadow: none;
+    border-color: var(--border);
+  }
+  .section-card.coming-soon::before { display: none; }
+  .section-card h3 {
+    margin: 0 0 6px;
+    color: var(--text);
+    font-size: 17px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-card p {
+    margin: 0;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .section-card .badge {
+    font-size: 10px;
+    padding: 3px 8px;
     border-radius: 999px;
+    background: rgba(245, 158, 11, 0.15);
+    color: var(--pro);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  /* Section content */
+  .section-content {
+    display: none;
+  }
+  .section-content.active {
+    display: block;
+  }
+
+  /* Flow diagram styles */
+  .flow-diagram {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 16px 20px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin: 16px 0;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .flow-step {
+    padding: 8px 16px;
+    background: rgba(13, 183, 237, 0.15);
+    border: 1px solid rgba(13, 183, 237, 0.3);
+    border-radius: 8px;
     font-size: 13px;
     font-weight: 500;
-    color: var(--text-2);
-    transition: all 0.2s;
-    backdrop-filter: blur(10px);
-  }
-  .level-pills a:hover {
-    border-color: var(--accent);
     color: var(--text);
-    transform: translateY(-1px);
-    text-decoration: none;
-    box-shadow: 0 8px 20px rgba(13, 183, 237, 0.15);
+  }
+  .flow-step.success { background: rgba(16, 185, 129, 0.15); border-color: rgba(16, 185, 129, 0.3); }
+  .flow-step.error { background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.3); }
+  .flow-arrow {
+    color: var(--accent);
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  /* Info boxes */
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+    margin: 16px 0;
+  }
+  .info-box {
+    padding: 16px 18px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+  }
+  .info-box h4 {
+    margin: 0 0 8px;
+    font-size: 14px;
+    color: var(--accent);
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .info-box p {
+    margin: 0;
+    font-size: 13px;
   }
 
   /* Section headings */
   h2 {
-    font-size: 30px;
+    font-size: 28px;
     font-weight: 700;
-    margin: 64px 0 20px;
-    padding-top: 24px;
+    margin: 48px 0 16px;
+    padding-top: 20px;
     letter-spacing: -0.02em;
     position: relative;
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 12px;
   }
   h2::before {
     content: '';
     width: 4px;
-    height: 28px;
+    height: 26px;
     background: var(--grad-1);
     border-radius: 2px;
   }
-  h2:first-of-type { border-top: none; padding-top: 0; }
+  h2:first-of-type { border-top: none; padding-top: 0; margin-top: 0; }
   h3 {
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 600;
-    margin: 36px 0 12px;
+    margin: 32px 0 10px;
     letter-spacing: -0.01em;
     color: var(--text);
   }
-  h3 .anchor-icon {
-    font-size: 14px;
-    color: var(--accent);
-    margin-right: 8px;
-  }
   h4 {
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 600;
-    margin: 24px 0 8px;
+    margin: 20px 0 8px;
     color: var(--text-2);
     text-transform: uppercase;
     letter-spacing: 0.06em;
   }
-  p { margin: 8px 0 14px; color: var(--text-2); }
-  ul, ol { padding-left: 22px; color: var(--text-2); }
-  li { margin: 6px 0; }
+  p { margin: 8px 0 12px; color: var(--text-2); }
+  ul, ol { padding-left: 20px; color: var(--text-2); }
+  li { margin: 5px 0; }
   li::marker { color: var(--accent); }
 
   /* Callouts */
@@ -272,9 +425,9 @@
     border: 1px solid var(--border);
     border-left: 3px solid var(--accent);
     background: rgba(13, 183, 237, 0.06);
-    padding: 14px 18px;
+    padding: 12px 16px;
     border-radius: 10px;
-    margin: 20px 0;
+    margin: 16px 0;
     font-size: 14px;
     color: var(--text-2);
     backdrop-filter: blur(8px);
@@ -302,9 +455,9 @@
     background: var(--code-bg);
     border: 1px solid var(--code-border);
     border-radius: 12px;
-    padding: 18px 20px;
+    padding: 16px 18px;
     overflow-x: auto;
-    margin: 16px 0 24px;
+    margin: 14px 0 20px;
     position: relative;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   }
@@ -320,15 +473,17 @@
   pre code .string { color: #86efac; }
   pre code .flag { color: #fbbf24; }
   pre code .number { color: #f472b6; }
+  pre code .fn { color: #60a5fa; }
+  pre code .const { color: #fbbf24; }
 
   .copy-btn {
     position: absolute;
-    top: 12px; right: 12px;
+    top: 10px; right: 10px;
     background: rgba(255, 255, 255, 0.05);
     color: var(--text-2);
     border: 1px solid var(--border-strong);
     border-radius: 6px;
-    padding: 5px 11px;
+    padding: 4px 10px;
     font-size: 11px;
     font-weight: 500;
     cursor: pointer;
@@ -351,7 +506,7 @@
     overflow-x: auto;
     border: 1px solid var(--border);
     border-radius: 12px;
-    margin: 16px 0 24px;
+    margin: 14px 0 20px;
     background: var(--panel);
     backdrop-filter: blur(10px);
   }
@@ -361,14 +516,14 @@
     font-size: 14px;
   }
   th, td {
-    padding: 12px 16px;
+    padding: 11px 14px;
     text-align: left;
     border-bottom: 1px solid var(--border);
   }
   th {
     background: rgba(255, 255, 255, 0.03);
     font-weight: 600;
-    font-size: 12px;
+    font-size: 11.5px;
     text-transform: uppercase;
     letter-spacing: 0.06em;
     color: var(--muted);
@@ -383,8 +538,8 @@
     background: var(--pro-soft);
     backdrop-filter: blur(8px);
     border-radius: 10px;
-    padding: 14px 18px;
-    margin: 16px 0;
+    padding: 12px 16px;
+    margin: 14px 0;
     font-size: 14px;
     color: var(--text-2);
     transition: all 0.2s;
@@ -399,176 +554,60 @@
     font-weight: 700;
     display: block;
     margin-bottom: 4px;
-    font-size: 12px;
+    font-size: 11.5px;
     letter-spacing: 0.04em;
     text-transform: uppercase;
   }
-
-  /* Section cards for the hero levels */
-  .level-section {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 16px;
-    margin: 24px 0 40px;
-  }
-  .level-card {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 20px;
-    backdrop-filter: blur(10px);
-    transition: all 0.3s;
-    position: relative;
-    overflow: hidden;
-  }
-  .level-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    background: var(--grad-1);
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform 0.3s;
-  }
-  .level-card:hover {
-    border-color: var(--border-strong);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-lg);
-  }
-  .level-card:hover::before { transform: scaleX(1); }
-  .level-card h4 {
-    margin: 0 0 6px;
-    color: var(--text);
-    text-transform: none;
-    letter-spacing: -0.01em;
-    font-size: 16px;
-  }
-  .level-card p {
-    margin: 0;
-    font-size: 13px;
-    color: var(--muted);
-  }
-  .level-card .emoji { font-size: 24px; margin-bottom: 8px; display: block; }
 
   footer {
     color: var(--muted);
     font-size: 12px;
     border-top: 1px solid var(--border);
-    margin-top: 80px;
-    padding-top: 24px;
+    margin-top: 64px;
+    padding-top: 20px;
     text-align: center;
   }
 </style>
 </head>
 <body>
-<div class="layout">
+<div class="layout" id="layout">
   <aside>
+    <button class="sidebar-toggle" id="sidebarToggle" title="Toggle sidebar">◀</button>
     <div class="brand">
-      <div class="brand-logo">🐳</div>
-      <div class="brand-text">Docker Reference</div>
+      <div class="brand-logo">📋</div>
+      <div class="brand-text">Referencia</div>
     </div>
-    <div class="brand-sub">Beginner → Advanced</div>
+    <div class="brand-sub">Developer Cheatsheets</div>
     <nav>
-      <a class="section" href="#top">Overview</a>
-      <a href="#intro">Introduction</a>
-      <a href="#install">Installation</a>
-
-      <a class="section" href="#beginner">Beginner</a>
-      <a href="#concepts">Core Concepts</a>
-      <a href="#first-container">First Container</a>
-      <a href="#images">Working with Images</a>
-      <a href="#dockerfile">Writing a Dockerfile</a>
-      <a href="#volumes">Volumes &amp; Data</a>
-      <a href="#networking">Networking Basics</a>
-
-      <a class="section" href="#intermediate">Intermediate</a>
-      <a href="#compose">Docker Compose</a>
-      <a href="#multi-stage">Multi-stage Builds</a>
-      <a href="#registry">Registries</a>
-      <a href="#env">Configuration</a>
-      <a href="#healthchecks">Healthchecks</a>
-
-      <a class="section" href="#advanced">Advanced</a>
-      <a href="#security">Security Hardening</a>
-      <a href="#performance">Image Size &amp; Performance</a>
-      <a href="#debugging">Debugging</a>
-      <a href="#dockerignore">.dockerignore</a>
-      <a href="#buildkit">BuildKit &amp; Cache</a>
-      <a href="#networks-advanced">Advanced Networking</a>
-
-      <a class="section pro-link" href="#pro-tips">Pro Tips</a>
-      <a class="section" href="#cheatsheet">Cheatsheet</a>
+      <a class="section" href="#top">Referencia</a>
+      <a href="#docker" data-section="docker">🐳 Docker</a>
+      <a href="#javascript" data-section="javascript">📜 JavaScript</a>
     </nav>
   </aside>
 
   <main>
+    <!-- Hero / Landing -->
     <header id="top" class="hero">
-      <div class="hero-eyebrow">v1.0 · Updated 2026</div>
-      <h1>Master <span>Docker</span><br>From zero to production.</h1>
-      <p>A practical, end-to-end reference for learning containerization. Start at the top and work your way down — or jump in anywhere with the sidebar.</p>
-      <div class="level-pills">
-        <a href="#beginner">🟢 Beginner</a>
-        <a href="#intermediate">🟡 Intermediate</a>
-        <a href="#advanced">🔴 Advanced</a>
-        <a href="#pro-tips">⚡ Pro Tips</a>
-        <a href="#cheatsheet">📋 Cheatsheet</a>
-      </div>
+      <h1>Referencia</h1>
+      <p>Developer cheatsheets for common technologies. Click a section below to jump straight to that reference.</p>
     </header>
 
-    <section class="level-section">
-      <div class="level-card">
-        <span class="emoji">🟢</span>
-        <h4>Beginner</h4>
-        <p>Core concepts, your first container, Dockerfile basics, volumes, and networking fundamentals.</p>
-      </div>
-      <div class="level-card">
-        <span class="emoji">🟡</span>
-        <h4>Intermediate</h4>
-        <p>Compose, multi-stage builds, registries, configuration management, and healthchecks.</p>
-      </div>
-      <div class="level-card">
-        <span class="emoji">🔴</span>
-        <h4>Advanced</h4>
-        <p>Security hardening, performance tuning, debugging, BuildKit, and production patterns.</p>
-      </div>
-    </section>
+    <div class="section-grid">
+      <a href="#docker" class="section-card" data-section="docker">
+        <h3>🐳 Docker</h3>
+        <p>Containers, images, Dockerfiles, Compose, and best practices.</p>
+      </a>
+      <a href="#javascript" class="section-card" data-section="javascript">
+        <h3>📜 JavaScript</h3>
+        <p>Async patterns, error handling, and data mapping for B2B integrations.</p>
+      </a>
+    </div>
 
-    <!-- ========== OVERVIEW ========== -->
-    <section id="intro">
-      <h2>What is Docker?</h2>
-      <p>Docker packages an application and its dependencies into a standardized unit called a <strong>container</strong>. Containers share the host OS kernel but run in isolated user-space, making them lightweight, fast, and reproducible across environments.</p>
-      <div class="table-wrap">
-      <table>
-        <thead><tr><th>Aspect</th><th>Containers</th><th>Virtual Machines</th></tr></thead>
-        <tbody>
-          <tr><td>Boot time</td><td>Milliseconds</td><td>Seconds to minutes</td></tr>
-          <tr><td>Size</td><td>MBs</td><td>GBs</td></tr>
-          <tr><td>OS overhead</td><td>Shares host kernel</td><td>Runs full guest OS</td></tr>
-          <tr><td>Isolation</td><td>Process-level</td><td>Hardware-level</td></tr>
-        </tbody>
-      </table>
-      </div>
-    </section>
+    <!-- ========== DOCKER SECTION ========== -->
+    <div id="docker" class="section-content">
+      <h2>🐳 Docker</h2>
 
-    <section id="install">
-      <h2>Installation</h2>
-      <p>Docker Engine runs on Linux, macOS, and Windows (via WSL2).</p>
-      <h3>Linux (Ubuntu/Debian)</h3>
-      <pre><button class="copy-btn">Copy</button><code>curl -fsSL https://get.docker.com -o get-docker.sh
-sudo sh get-docker.sh
-sudo usermod -aG docker $USER   <span class="comment"># log out/in after this</span>
-docker --version</code></pre>
-      <h3>macOS / Windows</h3>
-      <p>Install <strong>Docker Desktop</strong> from <a href="https://www.docker.com/products/docker-desktop/">docker.com</a>. It bundles the engine, CLI, Compose, and a lightweight VM.</p>
-      <div class="callout"><strong>Verify:</strong> run <code>docker run hello-world</code> — it pulls a tiny image and prints a success message.</div>
-    </section>
-
-    <!-- ========== BEGINNER ========== -->
-    <section id="beginner">
-      <h2>🟢 Beginner</h2>
-
-      <h3 id="concepts">Core Concepts</h3>
+      <h3 id="docker-concepts">Core Concepts</h3>
       <div class="table-wrap">
       <table>
         <thead><tr><th>Term</th><th>Meaning</th></tr></thead>
@@ -583,7 +622,7 @@ docker --version</code></pre>
       </table>
       </div>
 
-      <h3 id="first-container">Your First Container</h3>
+      <h3 id="docker-first-container">Your First Container</h3>
       <pre><button class="copy-btn">Copy</button><code><span class="comment"># Run an interactive shell in a Ubuntu container</span>
 docker run -it --rm ubuntu:latest bash
 
@@ -596,7 +635,7 @@ docker stop web          <span class="comment"># stop it</span>
 docker rm web            <span class="comment"># remove the stopped container</span></code></pre>
       <div class="callout"><strong>Flags explained:</strong> <code>-d</code> detached (background), <code>-it</code> interactive TTY, <code>--rm</code> auto-remove when stopped, <code>-p HOST:CONT</code> port mapping.</div>
 
-      <h3 id="images">Working with Images</h3>
+      <h3 id="docker-images">Working with Images</h3>
       <pre><button class="copy-btn">Copy</button><code>docker images                  <span class="comment"># list local images</span>
 docker pull alpine:<span class="number">3.20</span>        <span class="comment"># download an image</span>
 docker rmi alpine:<span class="number">3.20</span>         <span class="comment"># remove an image</span>
@@ -617,7 +656,7 @@ docker tag myapp:<span class="number">1.0</span> me/myapp:<span class="number">1
       <pre><button class="copy-btn">Copy</button><code>docker build -t myapp:<span class="number">1.0</span> .          <span class="comment"># build from current dir</span>
 docker run -p <span class="number">3000</span>:<span class="number">3000</span> myapp:<span class="number">1.0</span>    <span class="comment"># run it</span></code></pre>
 
-      <h3 id="volumes">Volumes &amp; Data</h3>
+      <h3 id="docker-volumes">Volumes &amp; Data</h3>
       <p>Containers are ephemeral — data inside is lost when removed. Use <strong>volumes</strong> for persistence.</p>
       <pre><button class="copy-btn">Copy</button><code><span class="comment"># Named volume (managed by Docker)</span>
 docker volume create db-data
@@ -630,20 +669,15 @@ docker volume ls
 docker volume inspect db-data</code></pre>
       <div class="pro-tip">Prefer named volumes over bind mounts for databases — they're easier to back up, migrate, and don't depend on host paths.</div>
 
-      <h3 id="networking">Networking Basics</h3>
+      <h3 id="docker-networking">Networking Basics</h3>
       <pre><button class="copy-btn">Copy</button><code>docker network ls                       <span class="comment"># list networks</span>
 docker network create mynet             <span class="comment"># create a custom bridge</span>
 docker run -d --network mynet --name api myapi:<span class="number">1.0</span>
 docker run -d --network mynet -p <span class="number">8080</span>:<span class="number">80</span> --name web nginx   <span class="comment"># web→api via DNS name "api"</span>
 docker network inspect mynet</code></pre>
       <div class="callout"><strong>DNS magic:</strong> on a user-defined network, containers resolve each other by name (here, <code>api</code> is reachable from <code>web</code> as <code>http://api:80</code>).</div>
-    </section>
 
-    <!-- ========== INTERMEDIATE ========== -->
-    <section id="intermediate">
-      <h2>🟡 Intermediate</h2>
-
-      <h3 id="compose">Docker Compose</h3>
+      <h3 id="docker-compose">Docker Compose</h3>
       <p>Compose lets you declare multi-container apps in YAML and manage them as one.</p>
       <pre><button class="copy-btn">Copy</button><code><span class="comment"># docker-compose.yml</span>
 <span class="keyword">services</span>:
@@ -653,8 +687,6 @@ docker network inspect mynet</code></pre>
       - <span class="string">"8080:80"</span>
     <span class="keyword">depends_on</span>:
       - api
-    <span class="keyword">environment</span>:
-      - API_URL=http://api:3000
 
   <span class="keyword">api</span>:
     <span class="keyword">build</span>: ./api
@@ -687,7 +719,7 @@ docker compose exec web sh    <span class="comment"># shell into a service</span
 docker compose down           <span class="comment"># stop &amp; remove containers/networks</span>
 docker compose down -v        <span class="comment"># also remove volumes</span></code></pre>
 
-      <h3 id="multi-stage">Multi-stage Builds</h3>
+      <h3 id="docker-multi-stage">Multi-stage Builds</h3>
       <p>Use multiple <code>FROM</code> stages to keep build tools out of the final image.</p>
       <pre><button class="copy-btn">Copy</button><code><span class="comment"># syntax=docker/dockerfile:1.7</span>
 <span class="comment"># ---- build stage ----</span>
@@ -705,7 +737,7 @@ docker compose down -v        <span class="comment"># also remove volumes</span>
 <span class="keyword">ENTRYPOINT</span> [<span class="string">"/app"</span>]</code></pre>
       <div class="pro-tip">A Go binary from this Dockerfile is ~10–20 MB instead of ~800 MB — and has no shell, no package manager, and a non-root user by default.</div>
 
-      <h3 id="registry">Registries &amp; Push/Pull</h3>
+      <h3 id="docker-registry">Registries &amp; Push/Pull</h3>
       <pre><button class="copy-btn">Copy</button><code>docker login                     <span class="comment"># login to default registry (Docker Hub)</span>
 docker login ghcr.io             <span class="comment"># GitHub Container Registry</span>
 docker tag myapp:<span class="number">1.0</span> ghcr.io/me/myapp:<span class="number">1.0</span>
@@ -714,28 +746,7 @@ docker pull ghcr.io/me/myapp:<span class="number">1.0</span>
 docker logout</code></pre>
       <div class="callout warn"><strong>Don't bake secrets into images.</strong> Anything in a layer is in the image forever — even after you "delete" it in a later layer. Use env vars, secrets, or mount at runtime.</div>
 
-      <h3 id="env">Environment &amp; Configuration</h3>
-      <pre><button class="copy-btn">Copy</button><code><span class="comment"># Pass env vars</span>
-docker run -e NODE_ENV=production -e LOG_LEVEL=info myapp:<span class="number">1.0</span>
-
-<span class="comment"># From a file</span>
-docker run --env-file .env myapp:<span class="number">1.0</span>
-
-<span class="comment"># Use BuildKit secrets at build time (never stored in image)</span>
-<span class="keyword">RUN</span> --mount=type=secret,id=npmrc,target=/root/.npmrc \
-    npm ci</code></pre>
-
-      <h3 id="healthchecks">Healthchecks</h3>
-      <pre><button class="copy-btn">Copy</button><code><span class="keyword">HEALTHCHECK</span> --interval=<span class="number">30</span>s --timeout=<span class="number">3</span>s --start-period=<span class="number">10</span>s --retries=<span class="number">3</span> \
-  <span class="keyword">CMD</span> curl -fsS http://localhost:<span class="number">3000</span>/health || exit <span class="number">1</span></code></pre>
-      <p><code>docker ps</code> shows the <code>(healthy)</code>/<code>(unhealthy)</code> status. Compose can gate service startup on <code>condition: service_healthy</code>.</p>
-    </section>
-
-    <!-- ========== ADVANCED ========== -->
-    <section id="advanced">
-      <h2>🔴 Advanced</h2>
-
-      <h3 id="security">Security Hardening</h3>
+      <h3 id="docker-security">Security Hardening</h3>
       <ol>
         <li><strong>Run as non-root.</strong> Add <code>USER</code> in your Dockerfile.</li>
         <li><strong>Minimal base images.</strong> Prefer <code>alpine</code>, <code>distroless</code>, or <code>scratch</code>.</li>
@@ -753,20 +764,7 @@ docker run --env-file .env myapp:<span class="number">1.0</span>
   --user <span class="number">1000</span>:<span class="number">1000</span> \
   myapp:<span class="number">1.0</span></code></pre>
 
-      <h3 id="performance">Image Size &amp; Performance</h3>
-      <ul>
-        <li>Order Dockerfile instructions from least to most frequently changing (leverage layer cache).</li>
-        <li>Combine <code>RUN</code> steps; clean package manager caches in the same layer.</li>
-        <li>Use <code>.dockerignore</code> to exclude <code>node_modules</code>, <code>.git</code>, build artifacts.</li>
-        <li>Multi-stage builds to throw away build toolchain.</li>
-        <li>Use <code>slim</code>/<code>alpine</code> base images when feasible.</li>
-      </ul>
-      <pre><button class="copy-btn">Copy</button><code><span class="comment"># Good: single layer, cached</span>
-<span class="keyword">RUN</span> apt-get update &amp;&amp; apt-get install -y --no-install-recommends \
-        curl ca-certificates \
-    &amp;&amp; rm -rf /var/lib/apt/lists/*</code></pre>
-
-      <h3 id="debugging">Debugging &amp; Inspection</h3>
+      <h3 id="docker-debugging">Debugging &amp; Inspection</h3>
       <pre><button class="copy-btn">Copy</button><code>docker logs -f --tail <span class="number">100</span> web           <span class="comment"># follow logs</span>
 docker exec -it web sh                 <span class="comment"># shell into a running container</span>
 docker inspect web                     <span class="comment"># full JSON config</span>
@@ -776,7 +774,6 @@ docker diff web                        <span class="comment"># filesystem change
 docker events --since <span class="number">10</span>m              <span class="comment"># daemon events</span>
 docker system df                       <span class="comment"># disk usage</span>
 docker system prune -a                 <span class="comment"># nuke everything unused</span></code></pre>
-      <p>For a network-level view: <code>docker run --rm -it --network container:web nicolaka/netshoot</code> gives you <code>curl</code>, <code>nslookup</code>, <code>tcpdump</code>, etc.</p>
 
       <h3 id="dockerignore">.dockerignore</h3>
       <pre><button class="copy-btn">Copy</button><code><span class="comment"># .dockerignore</span>
@@ -793,7 +790,7 @@ docker-compose*.yml
 .vscode
 .idea</code></pre>
 
-      <h3 id="buildkit">BuildKit &amp; Cache</h3>
+      <h3 id="docker-buildkit">BuildKit &amp; Cache</h3>
       <p>BuildKit is the modern builder: parallel builds, better caching, secrets, mounts.</p>
       <pre><button class="copy-btn">Copy</button><code><span class="comment"># Enable</span>
 export DOCKER_BUILDKIT=<span class="number">1</span>
@@ -810,57 +807,7 @@ docker buildx build \
     pip install -r requirements.txt</code></pre>
       <div class="pro-tip">Use <code>--mount=type=cache</code> for <code>pip</code>, <code>npm</code>, <code>go mod</code>, <code>cargo</code> — dependencies survive across builds without bloating the image.</div>
 
-      <h3 id="networks-advanced">Advanced Networking</h3>
-      <ul>
-        <li><strong>bridge</strong> (default): isolated, NAT to host.</li>
-        <li><strong>host</strong>: no isolation, container shares host network stack. Fastest, least safe.</li>
-        <li><strong>none</strong>: no networking — bring your own.</li>
-        <li><strong>overlay</strong>: multi-host networking (Swarm/Kubernetes).</li>
-        <li><strong>macvlan</strong>: container appears as a physical device on your LAN.</li>
-      </ul>
-      <pre><button class="copy-btn">Copy</button><code><span class="comment"># Run with host networking (only when you need max performance and trust the workload)</span>
-docker run --network host nginx
-
-<span class="comment"># Attach a second network to a running container</span>
-docker network connect monitoring web</code></pre>
-    </section>
-
-    <!-- ========== PRO TIPS ========== -->
-    <section id="pro-tips">
-      <h2>⚡ Pro Tips</h2>
-
-      <div class="pro-tip"><strong>Pin by digest for reproducibility.</strong> Tags are mutable; digests aren't. Use <code>node:20-alpine@sha256:&lt;digest&gt;</code> in production.</div>
-
-      <div class="pro-tip"><strong>One process per container.</strong> Compose for multi-service apps. A container doing five things is hard to scale, debug, and update.</div>
-
-      <div class="pro-tip"><strong>Log to stdout/stderr.</strong> Let the Docker logging driver handle aggregation — don't write to files inside the container (they're lost without explicit mounts).</div>
-
-      <div class="pro-tip"><strong>Use exec form for CMD/ENTRYPOINT.</strong> <code>CMD ["node","server.js"]</code> doesn't shell-wrap, so signals (SIGTERM) reach your app for graceful shutdown.</div>
-
-      <div class="pro-tip"><strong>Set a stop grace period.</strong> <code>docker run --stop-timeout 30 ...</code> or in Compose <code>stop_grace_period: 30s</code>. Containers that ignore SIGTERM hang the orchestrator.</div>
-
-      <div class="pro-tip"><strong>Build with <code>--pull</code> in CI.</strong> <code>docker build --pull -t myapp:$CI_SHA .</code> ensures you get the latest base image, not a stale cache.</div>
-
-      <div class="pro-tip"><strong>Use BuildKit secrets and ssh mounts.</strong> Never <code>COPY</code> a token into a layer; mount it at build time and it's not in the image.</div>
-
-      <div class="pro-tip"><strong>Combine <code>HEALTHCHECK</code> with Compose <code>depends_on: condition: service_healthy</code></strong> so dependent services wait for real readiness, not just "process started."</div>
-
-      <div class="pro-tip"><strong>Use <code>docker init</code>.</strong> Docker 24+ scaffolds a sensible <code>.dockerignore</code>, Dockerfile, and Compose file for Node/Python/Go/Java. Great starting point.</div>
-
-      <div class="pro-tip"><strong>Image scanning in CI.</strong> Block merges on HIGH/CRITICAL CVEs: <code>trivy image --exit-code 1 --severity HIGH,CRITICAL myapp:$SHA</code>.</div>
-
-      <div class="pro-tip"><strong>Smaller is safer.</strong> Every extra binary is an extra attack surface and bug surface. distroless/scratch for Go, alpine for Node/Python, slim for Java.</div>
-
-      <div class="pro-tip"><strong>Use <code>docker compose --profile dev up</code></strong> to keep dev-only services (adminer, mailhog) out of production.</div>
-
-      <div class="pro-tip"><strong>Don't <code>docker system prune -a</code> on a shared host.</strong> It removes all stopped containers and unused images — including other people's. Scope it or use <code>--filter</code>.</div>
-
-      <div class="pro-tip"><strong>Resource limits.</strong> Always set <code>--memory</code> and <code>--cpus</code> in production; one runaway container can starve the host.</div>
-    </section>
-
-    <!-- ========== CHEATSHEET ========== -->
-    <section id="cheatsheet">
-      <h2>📋 Cheatsheet</h2>
+      <h3 id="docker-cheatsheet">Cheatsheet</h3>
       <div class="table-wrap">
       <table>
         <thead><tr><th>Goal</th><th>Command</th></tr></thead>
@@ -876,32 +823,894 @@ docker network connect monitoring web</code></pre>
           <tr><td>Build image</td><td><code>docker build -t myapp:1.0 .</code></td></tr>
           <tr><td>Tag image</td><td><code>docker tag myapp:1.0 me/myapp:1.0</code></td></tr>
           <tr><td>Push / pull</td><td><code>docker push me/myapp:1.0</code> · <code>docker pull me/myapp:1.0</code></td></tr>
-          <tr><td>Disk usage</td><td><code>docker system df</code></td></tr>
-          <tr><td>Clean up</td><td><code>docker system prune -a --volumes</code></td></tr>
           <tr><td>Compose up / down</td><td><code>docker compose up -d</code> · <code>docker compose down -v</code></td></tr>
-          <tr><td>Compose logs</td><td><code>docker compose logs -f</code></td></tr>
         </tbody>
       </table>
       </div>
-      <footer>
-        Built as a single self-contained HTML file — no build step, no dependencies. Open in any browser.
-      </footer>
-    </section>
+    </div>
+
+    <!-- ========== JAVASCRIPT SECTION ========== -->
+    <div id="javascript" class="section-content">
+      <h2>📜 JavaScript</h2>
+      <p>Patterns and utilities for building B2B integrations with NetSuite, CRM, CPQ, and Commerce systems.</p>
+
+      <!-- Asynchrony -->
+      <h3 id="js-async">⚡ Asynchrony</h3>
+
+      <div class="callout"><strong>Why this matters:</strong> Enterprise integrations involve multiple API calls to different systems. Knowing how to handle these efficiently is critical for performance and reliability.</div>
+
+      <h4 id="js-async-basic">Basic async/await</h4>
+      <pre><button class="copy-btn">Copy</button><code><span class="comment">// Simple API call with async/await (arrow function)</span>
+<span class="keyword">const</span> getAccount = <span class="keyword">async</span> (id) => {
+  <span class="keyword">const</span> response = <span class="keyword">await</span> fetch(
+    <span class="string">`https://your-netsuite.com/api/account/${id}`</span>,
+    {
+      headers: {
+        <span class="string">'Authorization'</span>: <span class="string">`Bearer ${token}`</span>,
+        <span class="string">'Content-Type'</span>: <span class="string">'application/json'</span>
+      }
+    }
+  );
+
+  <span class="keyword">if</span> (!response.ok) {
+    <span class="keyword">throw new</span> Error(<span class="string">`Failed: ${response.status}`</span>);
+  }
+
+  <span class="keyword">return</span> response.json();
+};
+
+<span class="comment">// Usage</span>
+getAccount(<span class="number">123</span>).then(console.log).catch(console.error);
+
+<span class="comment">// Or with top-level await (modern browsers)</span>
+<span class="keyword">const</span> account = <span class="keyword">await</span> getAccount(<span class="number">123</span>);</code></pre>
+
+      <h4 id="js-async-parallel">Parallel requests — fetch multiple records at once</h4>
+      <pre><button class="copy-btn">Copy</button><code><span class="comment">// Fetch account + contacts in parallel (faster!)</span>
+<span class="keyword">const</span> getAccountWithContacts = <span class="keyword">async</span> (accountId) => {
+  <span class="keyword">const</span> [accountRes, contactsRes] = <span class="keyword">await</span> Promise.all([
+    fetch(<span class="string">`/api/accounts/${accountId}`</span>),
+    fetch(<span class="string">`/api/accounts/${accountId}/contacts`</span>)
+  ]);
+
+  <span class="keyword">const</span> [account, contacts] = <span class="keyword">await</span> Promise.all([
+    accountRes.json(),
+    contactsRes.json()
+  ]);
+
+  <span class="keyword">return</span> { ...account, contacts };
+};
+
+<span class="comment">// Pro tip: Promise.all waits for ALL to succeed</span>
+<span class="comment">// Promise.allSettled gets results even if some fail</span></code></pre>
+
+      <h4 id="js-async-retry">Retry with exponential backoff</h4>
+      <pre><button class="copy-btn">Copy</button><code><span class="comment">// Modern retry with exponential backoff using recursion</span>
+<span class="keyword">const</span> fetchWithRetry = <span class="keyword">async</span> (url, options = {}, maxRetries = <span class="number">3</span>) => {
+  <span class="keyword">const</span> sleep = (ms) => <span class="keyword">new</span> Promise(resolve => setTimeout(resolve, ms));
+
+  <span class="keyword">const</span> attempt = <span class="keyword">async</span> (retriesLeft) => {
+    <span class="keyword">try</span> {
+      <span class="keyword">const</span> response = <span class="keyword">await</span> fetch(url, options);
+      <span class="keyword">if</span> (!response.ok) <span class="keyword">throw new</span> Error(response.status);
+      <span class="keyword">return</span> response.json();
+    } <span class="keyword">catch</span> (error) {
+      <span class="keyword">if</span> (retriesLeft === <span class="number">0</span>) <span class="keyword">throw</span> error;
+      <span class="keyword">const</span> delay = <span class="number">1000</span> * (<span class="number">2</span> ** (maxRetries - retriesLeft));
+      console.log(<span class="string">`Retry ${maxRetries - retriesLeft + 1}/${maxRetries} after ${delay}ms`</span>);
+      <span class="keyword">await</span> sleep(delay);
+      <span class="keyword">return</span> attempt(retriesLeft - <span class="number">1</span>);
+    }
+  };
+
+  <span class="keyword">return</span> attempt(maxRetries);
+};
+
+<span class="comment">// Shorter version using a loop</span>
+<span class="keyword">const</span> fetchWithRetryShort = <span class="keyword">async</span> (url, options = {}, maxRetries = <span class="number">3</span>) => {
+  <span class="keyword">for</span> (<span class="keyword">let</span> attempt = <span class="number">1</span>; attempt <= maxRetries; attempt++) {
+    <span class="keyword">try</span> {
+      <span class="keyword">const</span> response = <span class="keyword">await</span> fetch(url, options);
+      <span class="keyword">if</span> (!response.ok) <span class="keyword">throw new</span> Error(response.status);
+      <span class="keyword">return</span> response.json();
+    } <span class="keyword">catch</span> (error) {
+      <span class="keyword">if</span> (attempt === maxRetries) <span class="keyword">throw</span> error;
+      <span class="keyword">await</span> <span class="keyword">new</span> Promise(r => setTimeout(r, <span class="number">1000</span> * <span class="number">2</span> ** attempt));
+    }
+  }
+};</code></pre>
+
+      <h4 id="js-async-abort">Cancel long-running requests</h4>
+      <pre><button class="copy-btn">Copy</button><code><span class="comment">// AbortController - cancel request if user navigates away</span>
+<span class="keyword">const</span> controller = <span class="keyword">new</span> AbortController();
+
+<span class="keyword">const</span> searchAccounts = <span class="keyword">async</span> (query) => {
+  <span class="keyword">const</span> response = <span class="keyword">await</span> fetch(<span class="string">`/api/accounts?q=${query}`</span>, {
+    signal: controller.signal
+  });
+  <span class="keyword">return</span> response.json();
+};
+
+<span class="comment">// To cancel:</span>
+controller.abort();
+
+<span class="comment">// Reusable: create a cancellable fetch wrapper</span>
+<span class="keyword">const</span> createCancellableFetch = () => {
+  <span class="keyword">const</span> controller = <span class="keyword">new</span> AbortController();
+  <span class="keyword">return</span> {
+    abort: () => controller.abort(),
+    fetch: (url, opts) => fetch(url, { ...opts, signal: controller.signal })
+  };
+};</code></pre>
+
+      <div class="pro-tip">Use <code>Promise.allSettled</code> instead of <code>Promise.all</code> when you want results even if some requests fail.</div>
+
+      <div class="flow-diagram">
+        <span class="flow-step">Start</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-step">Request</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-step success">Success</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-step">Process Data</span>
+      </div>
+
+      <div class="info-grid">
+        <div class="info-box">
+          <h4>🚀 Parallel (Promise.all)</h4>
+          <p>Use when records are independent. Fetches 10 accounts in ~1 API round trip instead of 10 sequential calls.</p>
+        </div>
+        <div class="info-box">
+          <h4>🔗 Sequential (for await)</h4>
+          <p>Use when each record depends on the previous one, or to avoid rate limits.</p>
+        </div>
+      </div>
+
+      <!-- Error Handling -->
+      <h3 id="js-errors">🛡️ Error Handling</h3>
+
+      <h4 id="js-errors-custom">Custom error classes</h4>
+      <pre><button class="copy-btn">Copy</button><code><span class="comment">// Modern error classes using public class fields</span>
+<span class="keyword">class</span> IntegrationError <span class="keyword">extends</span> Error {
+  name = <span class="string">'IntegrationError'</span>;
+
+  <span class="keyword">constructor</span>(message, code, system) {
+    <span class="keyword">super</span>(message);
+    <span class="keyword">this</span>.code = code;
+    <span class="keyword">this</span>.system = system;
+  }
+}
+
+<span class="keyword">class</span> RateLimitError <span class="keyword">extends</span> Error {
+  name = <span class="string">'RateLimitError'</span>;
+  retryAfter;
+
+  <span class="keyword">constructor</span>(retryAfter) {
+    <span class="keyword">super</span>(<span class="string">`Rate limited. Retry after ${retryAfter}s`</span>);
+    <span class="keyword">this</span>.retryAfter = retryAfter;
+  }
+}
+
+<span class="keyword">class</span> ValidationError <span class="keyword">extends</span> Error {
+  name = <span class="string">'ValidationError'</span>;
+  fieldErrors = [];
+
+  <span class="keyword">constructor</span>(message, fieldErrors = []) {
+    <span class="keyword">super</span>(message);
+    <span class="keyword">this</span>.fieldErrors = fieldErrors;
+  }
+}
+
+<span class="comment">// Factory function (modern alternative to constructors)</span>
+<span class="keyword">const</span> createIntegrationError = (message, code, system) => {
+  <span class="keyword">const</span> error = <span class="keyword">new</span> Error(message);
+  error.name = <span class="string">'IntegrationError'</span>;
+  error.code = code;
+  error.system = system;
+  <span class="keyword">return</span> error;
+};</code></pre>
+
+      <h4 id="js-errors-handling">Structured error handling</h4>
+      <pre><button class="copy-btn">Copy</button><code><span class="comment">// Modern error handling with arrow function + early returns</span>
+<span class="keyword">const</span> syncAccount = <span class="keyword">async</span> (accountData) => {
+  <span class="keyword">try</span> {
+    <span class="keyword">const</span> result = <span class="keyword">await</span> createAccountInCRM(accountData);
+    <span class="keyword">return</span> { success: <span class="keyword">true</span>, crmId: result.id };
+  } <span class="keyword">catch</span> (error) {
+    <span class="comment">// Pattern match using instanceof</span>
+    <span class="keyword">if</span> (error <span class="keyword">instanceof</span> ValidationError) {
+      console.error(<span class="string">`Validation failed: ${error.fieldErrors}`</span>);
+      <span class="keyword">return</span> { success: <span class="keyword">false</span>, type: <span class="string">'validation'</span>, errors: error.fieldErrors };
+    }
+
+    <span class="comment">// Handle specific error codes</span>
+    <span class="keyword">if</span> (error.code === <span class="string">'NETSUITE_DUPLICATE'</span>) {
+      console.error(<span class="string">`Account already exists: ${accountData.externalId}`</span>);
+      <span class="keyword">return</span> { success: <span class="keyword">false</span>, type: <span class="string">'duplicate'</span> };
+    }
+
+    <span class="comment">// Retry with backoff</span>
+    <span class="keyword">if</span> (error <span class="keyword">instanceof</span> RateLimitError) {
+      console.log(<span class="string">`Waiting ${error.retryAfter}s...`</span>);
+      <span class="keyword">await</span> <span class="keyword">new</span> Promise(r => setTimeout(r, error.retryAfter * <span class="number">1000</span>));
+      <span class="keyword">return</span> syncAccount(accountData);
+    }
+
+    <span class="comment">// Re-throw unknown errors</span>
+    <span class="keyword">throw</span> error;
+  }
+};
+
+<span class="comment">// Modern approach: Result pattern (like Rust)</span>
+<span class="keyword">const</span> safeSync = <span class="keyword">async</span> (accountData) => {
+  <span class="keyword">try</span> {
+    <span class="keyword">return</span> { ok: <span class="keyword">true</span>, data: <span class="keyword">await</span> createAccountInCRM(accountData) };
+  } <span class="keyword">catch</span> (error) {
+    <span class="keyword">return</span> { ok: <span class="keyword">false</span>, error };
+  }
+};</code></pre>
+
+      <h4 id="js-errors-circuit">Circuit breaker pattern</h4>
+      <pre><button class="copy-btn">Copy</button><code><span class="comment">// Modern Circuit Breaker with private fields (#)</span>
+<span class="keyword">class</span> CircuitBreaker {
+  #state = <span class="string">'CLOSED'</span>;
+  #failureCount = <span class="number">0</span>;
+  #failureThreshold;
+  #resetTimeout;
+
+  <span class="keyword">constructor</span>(failureThreshold = <span class="number">5</span>, resetTimeout = <span class="number">30000</span>) {
+    <span class="keyword">this</span>.#failureThreshold = failureThreshold;
+    <span class="keyword">this</span>.#resetTimeout = resetTimeout;
+  }
+
+  <span class="keyword">get</span> state() { <span class="keyword">return</span> <span class="keyword">this</span>.#state; }
+
+  <span class="keyword">async</span> execute(fn) {
+    <span class="keyword">if</span> (<span class="keyword">this</span>.#state === <span class="string">'OPEN'</span>) {
+      <span class="keyword">throw new</span> Error(<span class="string">'Circuit OPEN - too many failures'</span>);
+    }
+
+    <span class="keyword">try</span> {
+      <span class="keyword">const</span> result = <span class="keyword">await</span> fn();
+      <span class="keyword">this</span>.#onSuccess();
+      <span class="keyword">return</span> result;
+    } <span class="keyword">catch</span> (e) {
+      <span class="keyword">this</span>.#onFailure();
+      <span class="keyword">throw</span> e;
+    }
+  }
+
+  #onSuccess() {
+    <span class="keyword">this</span>.#failureCount = <span class="number">0</span>;
+    <span class="keyword">this</span>.#state = <span class="string">'CLOSED'</span>;
+  }
+
+  #onFailure() {
+    <span class="keyword">this</span>.#failureCount++;
+    <span class="keyword">if</span> (<span class="keyword">this</span>.#failureCount >= <span class="keyword">this</span>.#failureThreshold) {
+      <span class="keyword">this</span>.#state = <span class="string">'OPEN'</span>;
+      setTimeout(() => <span class="keyword">this</span>.#state = <span class="string">'HALF_OPEN'</span>, <span class="keyword">this</span>.#resetTimeout);
+    }
+  }
+}
+
+<span class="comment">// Usage</span>
+<span class="keyword">const</span> nsBreaker = <span class="keyword">new</span> CircuitBreaker();
+<span class="keyword">const</span> result = <span class="keyword">await</span> nsBreaker.execute(() => fetch(<span class="string">'/api/ns'</span>));
+
+<span class="comment">// Modern functional approach (factory function)</span>
+<span class="keyword">const</span> createBreaker = (threshold = <span class="number">5</span>, timeout = <span class="number">30000</span>) => {
+  <span class="keyword">let</span> failures = <span class="number">0</span>;
+  <span class="keyword">let</span> state = <span class="string">'CLOSED'</span>;
+
+  <span class="keyword">return</span> {
+    <span class="keyword">get</span> state() { <span class="keyword">return</span> state; },
+    <span class="keyword">execute</span>: <span class="keyword">async</span> (fn) => {
+      <span class="keyword">if</span> (state === <span class="string">'OPEN'</span>) <span class="keyword">throw</span> <span class="keyword">new</span> Error(<span class="string">'OPEN'</span>);
+      <span class="keyword">try</span> { <span class="keyword">const</span> r = <span class="keyword">await</span> fn(); failures = <span class="number">0</span>; state = <span class="string">'CLOSED'</span>; <span class="keyword">return</span> r; }
+      <span class="keyword">catch</span> { failures++; <span class="keyword">if</span> (failures >= threshold) state = <span class="string">'OPEN'</span>; <span class="keyword">throw</span>; }
+    }
+  };
+};</code></pre>
+
+      <div class="callout warn"><strong>Logging tip:</strong> Always log the correlation ID, system name, and timestamp. Makes debugging integrations much easier.</div>
+
+      <div class="info-grid">
+        <div class="info-box">
+          <h4>🛡️ Custom Error Classes</h4>
+          <p>Create specific error types for each system (NetSuite, CRM, CPQ). Makes error handling and debugging much easier.</p>
+        </div>
+        <div class="info-box">
+          <h4>🔄 Circuit Breaker</h4>
+          <p>Stops calling a failing service repeatedly. Gives it time to recover while your app keeps working.</p>
+        </div>
+      </div>
+
+      <!-- Data Mapping -->
+      <h3 id="js-mapping">🔄 Data Mapping</h3>
+
+      <h4 id="js-mapping-basic">Field mapping function</h4>
+      <pre><button class="copy-btn">Copy</button><code><span class="comment">// Map NetSuite fields to CRM fields (modern arrow functions)</span>
+<span class="keyword">const</span> fieldMapping = {
+  <span class="comment">// NetSuite field → CRM field</span>
+  <span class="string">'companyname'</span>: <span class="string">'name'</span>,
+  <span class="string">'email'</span>: <span class="string">'primaryEmail'</span>,
+  <span class="string">'phone'</span>: <span class="string">'primaryPhone'</span>,
+  <span class="string">'custentity_billing_cycle'</span>: <span class="string">'billingCycle'</span>,
+  <span class="string">'custentity_external_id'</span>: <span class="string">'erpId'</span>
+};
+
+<span class="comment">// Modern functional approach using reduce</span>
+<span class="keyword">const</span> mapNetSuiteToCRM = (nsRecord) => {
+  <span class="keyword">return</span> Object.entries(fieldMapping).reduce((acc, [nsField, crmField]) => {
+    <span class="keyword">if</span> (nsRecord[nsField] !== <span class="keyword">undefined</span>) {
+      acc[crmField] = nsRecord[nsField];
+    }
+    <span class="keyword">return</span> acc;
+  }, {});
+};
+
+<span class="comment">// Even shorter: one-liner with filter</span>
+<span class="keyword">const</span> mapNetSuiteToCRMShort = (nsRecord) =>
+  Object.fromEntries(
+    Object.entries(fieldMapping)
+      .filter(([nsField]) => nsRecord[nsField] !== <span class="keyword">undefined</span>)
+      .map(([nsField, crmField]) => [crmField, nsRecord[nsField]])
+  );</code></pre>
+
+      <h4 id="js-mapping-transform">Data transformation</h4>
+      <pre><button class="copy-btn">Copy</button><code><span class="comment">// Modern transformers using method shorthand + arrow functions</span>
+<span class="keyword">const</span> transformers = {
+  <span class="comment">// Date: NetSuite '12/15/2024' → ISO '2024-12-15T00:00:00Z'</span>
+  date: (value) => {
+    <span class="keyword">if</span> (!value) <span class="keyword">return null</span>;
+    <span class="keyword">const</span> [month, day, year] = value.split(<span class="string">'/'</span>);
+    <span class="keyword">return</span> <span class="keyword">new</span> Date(year, month - <span class="number">1</span>, day).toISOString();
+  },
+
+  <span class="comment">// Currency: '1500.00' → 1500 (number)</span>
+  currency: (value) => (typeof value === <span class="string">'string'</span> ? parseFloat(value) : value),
+
+  <span class="comment">// Boolean: 'T'/'F' → true/false (modern ternary chain)</span>
+  boolean: (value) =>
+    value === <span class="string">'T'</span> || value === <span class="string">'true'</span> ? <span class="keyword">true</span> :
+    value === <span class="string">'F'</span> || value === <span class="string">'false'</span> ? <span class="keyword">false</span> : <span class="keyword">null</span>,
+
+  <span class="comment">// Custom list: '1-CUSTOMER' → 'CUSTOMER'</span>
+  list: (value) => value?.split(<span class="string">'-'</span>)[<span class="number">1</span>] ?? <span class="keyword">null</span>
+};
+
+<span class="comment">// Modern transform with default parameter + optional chaining</span>
+<span class="keyword">const</span> transformValue = (value, type, defaultVal = value) =>
+  transformers[type]?.(value) ?? defaultVal;
+
+<span class="comment">// Usage with nullish coalescing</span>
+<span class="keyword">const</span> result = transformValue(<span class="string">'1500.00'</span>, <span class="string">'currency'</span>); <span class="comment">// → 1500</span></code></pre>
+
+      <h4 id="js-mapping-idempotency">Idempotency keys — prevent duplicate syncs</h4>
+      <pre><button class="copy-btn">Copy</button><code><span class="comment">// Modern arrow function for generating idempotency keys</span>
+<span class="keyword">const</span> generateIdempotencyKey = (source, recordType, externalId) =>
+  <span class="string">`${source}:${recordType}:${externalId}`</span>;
+
+<span class="comment">// Check if we've already synced this record</span>
+<span class="keyword">const</span> syncAccount = <span class="keyword">async</span> (nsAccount) => {
+  <span class="keyword">const</span> key = generateIdempotencyKey(<span class="string">'netsuite'</span>, <span class="string">'account'</span>, nsAccount.internalId);
+  <span class="keyword">const</span> cacheKey = <span class="string">`sync:${key}`</span>;
+
+  <span class="comment">// Check if already synced (early return pattern)</span>
+  <span class="keyword">const</span> existing = <span class="keyword">await</span> redis.get(cacheKey);
+  <span class="keyword">if</span> (existing) {
+    console.log(<span class="string">`Already synced ${key}, skipping`</span>);
+    <span class="keyword">return</span> { skipped: <span class="keyword">true</span>, existingId: existing };
+  }
+
+  <span class="comment">// Proceed with sync</span>
+  <span class="keyword">const</span> crmResult = <span class="keyword">await</span> createCRMAccount(mapNetSuiteToCRM(nsAccount));
+
+  <span class="comment">// Store with 30-day TTL</span>
+  <span class="keyword">await</span> redis.set(cacheKey, crmResult.id, <span class="string">'EX'</span>, <span class="number">86400</span> * <span class="number">30</span>);
+
+  <span class="keyword">return</span> { synced: <span class="keyword">true</span>, crmId: crmResult.id };
+};
+
+<span class="comment">// Modern: Use SET with NX for atomic idempotency</span>
+<span class="keyword">const</span> syncAccountAtomic = <span class="keyword">async</span> (nsAccount) => {
+  <span class="keyword">const</span> key = <span class="string">`sync:${generateIdempotencyKey(<span class="string">'netsuite'</span>, <span class="string">'account'</span>, nsAccount.internalId)}`</span>;
+  <span class="keyword">const</span> result = <span class="keyword">await</span> redis.set(key, <span class="string">''</span>, <span class="string">'NX'</span>, <span class="string">'EX'</span>, <span class="number">86400</span> * <span class="number">30</span>);
+
+  <span class="keyword">if</span> (!result) {
+    <span class="keyword">return</span> { skipped: <span class="keyword">true</span>, message: <span class="string">'Already being synced'</span> };
+  }
+
+  <span class="comment">// Do sync work...</span>
+  <span class="keyword">return</span> { synced: <span class="keyword">true</span> };
+};</code></pre>
+
+      <h4 id="js-mapping-parent">Parent-child record sync</h4>
+      <pre><button class="copy-btn">Copy</button><code><span class="comment">// Sync Account first, then Contacts (modern arrow function)</span>
+<span class="keyword">const</span> syncAccountWithContacts = <span class="keyword">async</span> (nsAccount) => {
+  <span class="comment">// 1. Sync parent record first</span>
+  <span class="keyword">const</span> crmAccount = <span class="keyword">await</span> syncAccount(nsAccount);
+  <span class="keyword">if</span> (!crmAccount.success) <span class="keyword">throw</span> <span class="keyword">new</span> Error(<span class="string">'Account sync failed'</span>);
+
+  <span class="comment">// 2. Get contacts from NetSuite</span>
+  <span class="keyword">const</span> nsContacts = <span class="keyword">await</span> fetchContacts(nsAccount.internalId);
+
+  <span class="comment">// 3. Sync each contact with Promise.allSettled</span>
+  <span class="keyword">const</span> results = <span class="keyword">await</span> Promise.allSettled(
+    nsContacts.map((contact) => syncContact({ ...contact, accountId: crmAccount.crmId }))
+  );
+
+  <span class="comment">// 4. Analyze results (modern filter + concise callback)</span>
+  <span class="keyword">const</span> failed = results.filter(({ status }) => status === <span class="string">'rejected'</span>);
+  <span class="keyword">if</span> (failed.length > <span class="number">0</span>) {
+    console.error(<span class="string">`${failed.length} contacts failed to sync`</span>);
+  }
+
+  <span class="keyword">return</span> {
+    account: crmAccount,
+    contactsSynced: results.length - failed.length
+  };
+};
+
+<span class="comment">// Modern: Process children sequentially for better error handling</span>
+<span class="keyword">const</span> syncWithSequentialChildren = <span class="keyword">async</span> (nsAccount) => {
+  <span class="keyword">const</span> crmAccount = <span class="keyword">await</span> syncAccount(nsAccount);
+  <span class="keyword">const</span> nsContacts = <span class="keyword">await</span> fetchContacts(nsAccount.internalId);
+
+  <span class="keyword">let</span> synced = <span class="number">0</span>;
+  <span class="keyword">for</span> (<span class="keyword">const</span> contact of nsContacts) {
+    <span class="keyword">try</span> {
+      <span class="keyword">await</span> syncContact({ ...contact, accountId: crmAccount.crmId });
+      synced++;
+    } <span class="keyword">catch</span> (e) {
+      console.error(<span class="string">`Failed to sync contact ${contact.id}: ${e.message}`</span>);
+    }
+  }
+
+  <span class="keyword">return</span> { account: crmAccount, contactsSynced: synced };
+};</code></pre>
+
+      <div class="pro-tip">Always sync parent records before children. If the parent fails, skip the children — it prevents orphaned records in the target system.</div>
+
+      <div class="flow-diagram">
+        <span class="flow-step">NetSuite Account</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-step success">Sync Parent First</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-step">Get Contacts</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-step">Link to Parent</span>
+      </div>
+
+      <div class="callout"><strong>Idempotency:</strong> Use a combination of source system + record type + external ID as your key. This ensures the same record doesn't get synced twice even if the sync runs multiple times.</div>
+
+      <!-- Integration Essentials -->
+      <h3 id="js-integrations">🔗 Integration Essentials</h3>
+
+      <h4 id="js-integrations-oauth">OAuth 2.0 token refresh</h4>
+      <pre><button class="copy-btn">Copy</button><code><span class="comment">// Modern token cache with arrow function + closure</span>
+<span class="keyword">const</span> createTokenCache = () => {
+  <span class="keyword">let</span> cachedToken = <span class="keyword">null</span>;
+
+  <span class="keyword">const</span> getValidToken = <span class="keyword">async</span> () => {
+    <span class="comment">// Early return if token is still valid (with buffer)</span>
+    <span class="keyword">if</span> (cachedToken?.expiresAt > Date.now()) {
+      <span class="keyword">return</span> cachedToken.accessToken;
+    }
+
+    <span class="comment">// Refresh token</span>
+    <span class="keyword">const</span> response = <span class="keyword">await</span> fetch(<span class="string">'/oauth/token'</span>, {
+      method: <span class="string">'POST'</span>,
+      headers: { <span class="string">'Content-Type'</span>: <span class="string">'application/json'</span> },
+      body: JSON.stringify({
+        grant_type: <span class="string">'refresh_token'</span>,
+        refresh_token: cachedToken?.refreshToken
+      })
+    });
+
+    <span class="comment">// Update cache with buffer</span>
+    cachedToken = {
+      ...(<span class="keyword">await</span> response.json()),
+      expiresAt: Date.now() + <span class="number">3500</span> * <span class="number">1000</span>
+    };
+
+    <span class="keyword">return</span> cachedToken.accessToken;
+  };
+
+  <span class="keyword">const</span> clearToken = () => { cachedToken = <span class="keyword">null</span>; };
+
+  <span class="keyword">return</span> { getValidToken, clearToken };
+};
+
+<span class="comment">// Usage</span>
+<span class="keyword">const</span> tokenCache = createTokenCache();
+<span class="keyword">const</span> token = <span class="keyword">await</span> tokenCache.getValidToken();</code></pre>
+
+      <h4 id="js-integrations-pagination">Handle pagination</h4>
+      <pre><button class="copy-btn">Copy</button><code><span class="comment">// Modern pagination with async generator (ES2022)</span>
+<span class="keyword">async function*</span> fetchAllRecords(endpoint, pageSize = <span class="number">100</span>) {
+  <span class="keyword">let</span> offset = <span class="number">0</span>;
+
+  <span class="keyword">while</span> (<span class="keyword">true</span>) {
+    <span class="keyword">const</span> response = <span class="keyword">await</span> fetch(
+      <span class="string">`${endpoint}?limit=${pageSize}&offset=${offset}`</span>
+    );
+    <span class="keyword">const</span> { records, hasMore } = <span class="keyword">await</span> response.json();
+
+    <span class="keyword">yield</span>* records;
+
+    <span class="keyword">if</span> (!hasMore) <span class="keyword">break</span>;
+    offset += pageSize;
+  }
+}
+
+<span class="comment">// Usage with for await...of</span>
+<span class="keyword">for</span> <span class="keyword">await</span> (record of fetchAllRecords(<span class="string">'/api/accounts'</span>)) {
+  console.log(record);
+}
+
+<span class="comment">// Classic approach (still useful)</span>
+<span class="keyword">const</span> fetchAllRecordsClassic = <span class="keyword">async</span> (endpoint, pageSize = <span class="number">100</span>) => {
+  <span class="keyword">const</span> allRecords = [];
+  <span class="keyword">let</span> offset = <span class="number">0</span>;
+  <span class="keyword">let</span> hasMore = <span class="keyword">true</span>;
+
+  <span class="keyword">while</span> (hasMore) {
+    <span class="keyword">const</span> { records, hasMore: more } = <span class="keyword">await</span> fetch(
+      <span class="string">`${endpoint}?limit=${pageSize}&offset=${offset}`</span>
+    ).then(r => r.json());
+
+    allRecords.push(...records);
+    hasMore = more;
+    offset += pageSize;
+  }
+
+  <span class="keyword">return</span> allRecords;
+};</code></pre>
+
+      <h4 id="js-integrations-webhook">Verify webhook signatures</h4>
+      <pre><button class="copy-btn">Copy</button><code><span class="comment">// Modern webhook verification with arrow functions</span>
+<span class="keyword">import</span> { createHmac, timingSafeEqual } from <span class="string">'crypto'</span>;
+
+<span class="keyword">const</span> verifyWebhookSignature = (payload, signature, secret) => {
+  <span class="keyword">const</span> expected = createHmac(<span class="string">'sha256'</span>, secret)
+    .update(payload)
+    .digest(<span class="string">'hex'</span>);
+
+  <span class="keyword">return</span> timingSafeEqual(
+    Buffer.from(signature),
+    Buffer.from(expected)
+  );
+};
+
+<span class="comment">// Modern Express handler with async/await</span>
+app.post(<span class="string">'/webhook/crm'</span>, <span class="keyword">async</span> (req, res) => {
+  <span class="keyword">const</span> { [<span class="string">'x-webhook-signature'</span>]: signature } = req.headers;
+
+  <span class="keyword">const</span> payload = JSON.stringify(req.body);
+
+  <span class="keyword">if</span> (!verifyWebhookSignature(payload, signature, process.env.WEBHOOK_SECRET)) {
+    <span class="keyword">return</span> res.status(<span class="number">401</span>).send(<span class="string">'Invalid signature'</span>);
+  }
+
+  <span class="comment">// Process webhook asynchronously</span>
+  handleWebhookEvent(req.body);
+  res.status(<span class="number">200</span>).send(<span class="string">'OK'</span>);
+});
+
+<span class="comment">// Modern: Return early for invalid signature</span>
+app.post(<span class="string">'/webhook/crm'</span>, <span class="keyword">async</span> (req, res) => {
+  <span class="keyword">const</span> signature = req.headers[<span class="string">'x-webhook-signature'</span>];
+  <span class="keyword">if</span> (!verifyWebhookSignature(JSON.stringify(req.body), signature, process.env.WEBHOOK_SECRET)) {
+    <span class="keyword">return</span> res.status(<span class="number">401</span>).send(<span class="string">'Invalid signature'</span>);
+  }
+
+  handleWebhookEvent(req.body);
+  res.status(<span class="number">200</span>).send(<span class="string">'OK'</span>);
+});</code></pre>
+
+      <h4 id="js-integrations-batch">Batch operations</h4>
+      <pre><button class="copy-btn">Copy</button><code><span class="comment">// Modern batch processing with arrow functions</span>
+<span class="keyword">const</span> batchSync = <span class="keyword">async</span> (records, batchSize = <span class="number">50</span>, delayMs = <span class="number">1000</span>) => {
+  <span class="keyword">const</span> sleep = (ms) => <span class="keyword">new</span> Promise(resolve => setTimeout(resolve, ms));
+  <span class="keyword">const</span> results = [];
+
+  <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>; i < records.length; i += batchSize) {
+    <span class="keyword">const</span> batch = records.slice(i, i + batchSize);
+    <span class="keyword">const</span> batchNum = Math.floor(i / batchSize) + <span class="number">1</span>;
+    console.log(<span class="string">`Processing batch ${batchNum}...`</span>);
+
+    <span class="keyword">const</span> batchResults = <span class="keyword">await</span> Promise.allSettled(
+      batch.map(record => syncRecord(record))
+    );
+    results.push(...batchResults);
+
+    <span class="comment">// Rate limit: wait between batches (skip on last batch)</span>
+    <span class="keyword">if</span> (i + batchSize < records.length) {
+      <span class="keyword">await</span> sleep(delayMs);
+    }
+  }
+
+  <span class="keyword">return</span> results;
+};
+
+<span class="comment">// Modern: Chunk-based processing with error aggregation</span>
+<span class="keyword">const</span> batchSyncModern = <span class="keyword">async</span> (records, batchSize = <span class="number">50</span>) => {
+  <span class="keyword">const</span> chunks = Array.from({ length: Math.ceil(records.length / batchSize) },
+    (_, i) => records.slice(i * batchSize, (i + <span class="number">1</span>) * batchSize)
+  );
+
+  <span class="keyword">const</span> results = <span class="keyword">await</span> Promise.allSettled(
+    chunks.map(chunk => Promise.allSettled(chunk.map(syncRecord)))
+  );
+
+  <span class="comment">// Flatten and filter failures</span>
+  <span class="keyword">const</span> failures = results.flatMap(r => r.status === <span class="string">'rejected'</span> ? [r.reason] : []);
+
+  <span class="keyword">return</span> { total: records.length, failures };
+};</code></pre>
+
+      <!-- NetSuite Specific -->
+      <h3 id="js-netsuite">🏢 NetSuite Integration</h3>
+
+      <h4 id="js-netsuite-auth">REST API authentication</h4>
+      <pre><button class="copy-btn">Copy</button><code><span class="comment">// NetSuite REST API with token-based auth (TBA)</span>
+<span class="keyword">const</span> netsuiteRequest = <span class="keyword">async</span> (endpoint, method = <span class="string">'GET'</span>, body = <span class="keyword">null</span>) => {
+  <span class="keyword">const</span> { NETSUITE_ACCOUNT_ID: accountId, NETSUITE_TOKEN_ID: tokenId, NETSUITE_TOKEN_SECRET: tokenSecret } = process.env;
+
+  <span class="comment">// Generate TBA signature</span>
+  <span class="keyword">const</span> nonce = Math.random().toString(<span class="string">'base64'</span>).slice(<span class="number">2</span>, <span class="number">22</span>);
+  <span class="keyword">const</span> timestamp = Math.floor(Date.now() / <span class="number">1000</span>);
+  <span class="keyword">const</span> signature = btoa(<span class="string">`${tokenId}&${timestamp}&${nonce}&${method}&${endpoint}&${accountId}`</span>);
+
+  <span class="keyword">const</span> baseUrl = <span class="string">`https://${accountId}.suitetalk.api.netsuite.com/services/rest/record/v1`</span>;
+  <span class="keyword">const</span> headers = {
+    <span class="string">'Authorization'</span>: <span class="string">`TBA-V1 Ha=${accountId}, Haid=${tokenId}, Hats=${timestamp}, Haon=${nonce}, Hs=${signature}`</span>,
+    <span class="string">'Content-Type'</span>: <span class="string">'application/json'</span>,
+    <span class="string">'Accept'</span>: <span class="string">'application/json'</span>
+  };
+
+  <span class="keyword">const</span> response = <span class="keyword">await</span> fetch(<span class="string">`${baseUrl}/${endpoint}`</span>, { method, headers, body: body ? JSON.stringify(body) : <span class="keyword">undefined</span> });
+
+  <span class="keyword">if</span> (!response.ok) {
+    <span class="keyword">const</span> error = <span class="keyword">await</span> response.json();
+    <span class="keyword">throw new</span> IntegrationError(error.message || <span class="string">'NetSuite API error'</span>, <span class="string">`NS_${response.status}`</span>, <span class="string">'netsuite'</span>);
+  }
+
+  <span class="keyword">return</span> response.json();
+};
+
+<span class="comment">// Modern: Curried version for repeated calls</span>
+<span class="keyword">const</span> createNetsuiteClient = (config) => ({
+  request: <span class="keyword">async</span> (endpoint, method = <span class="string">'GET'</span>, body) =>
+    netsuiteRequest(endpoint, method, body),
+  get: (endpoint) => netsuiteRequest(endpoint),
+  post: (endpoint, body) => netsuiteRequest(endpoint, <span class="string">'POST'</span>, body),
+  patch: (endpoint, body) => netsuiteRequest(endpoint, <span class="string">'PATCH'</span>, body),
+  delete: (endpoint) => netsuiteRequest(endpoint, <span class="string">'DELETE'</span>)
+});</code></pre>
+
+      <h4 id="js-netsuite-errors">Handle NetSuite error codes</h4>
+      <pre><button class="copy-btn">Copy</button><code><span class="comment">// Modern Map-based error handler with concise arrow functions</span>
+<span class="keyword">const</span> NETSUITE_ERRORS = <span class="keyword">new</span> Map([
+  [<span class="string">'RCRD_DONT_EXIST'</span>, { message: <span class="string">'Record not found'</span>, action: <span class="string">'skip'</span> }],
+  [<span class="string">'RCRD_HAS_DEPENDANTS'</span>, { message: <span class="string">'Cannot delete - has children'</span>, action: <span class="string">'delete_children_first'</span> }],
+  [<span class="string">'SSS_REQUEST_BLOCKED'</span>, { message: <span class="string">'Rate limit exceeded'</span>, action: <span class="string">'retry_with_backoff'</span> }],
+  [<span class="string">'UNIQUE_CUST_ID_REQD'</span>, { message: <span class="string">'Duplicate detected'</span>, action: <span class="string">'update_existing'</span> }],
+  [<span class="string">'INVALID_INITIALIZE_OPTION'</span>, { message: <span class="string">'Invalid field values'</span>, action: <span class="string">'check_permissions'</span> }]
+]);
+
+<span class="keyword">const</span> handleNetsuiteError = (errorCode, errorMessage) =>
+  NETSUITE_ERRORS.get(errorCode)
+    ? { ...NETSUITE_ERRORS.get(errorCode), originalCode: errorCode }
+    : { action: <span class="string">'escalate'</span>, message: errorMessage, originalCode: errorCode };
+
+<span class="comment">// Modern switch expression approach (ES2022)</span>
+<span class="keyword">const</span> handleNetsuiteErrorModern = (errorCode, errorMessage) => {
+  <span class="keyword">const</span> action = <span class="keyword">switch</span> (errorCode) {
+    <span class="keyword">case</span> <span class="string">'RCRD_DONT_EXIST'</span> => <span class="string">'skip'</span>,
+    <span class="keyword">case</span> <span class="string">'RCRD_HAS_DEPENDANTS'</span> => <span class="string">'delete_children_first'</span>,
+    <span class="keyword">case</span> <span class="string">'SSS_REQUEST_BLOCKED'</span> => <span class="string">'retry_with_backoff'</span>,
+    <span class="keyword">case</span> <span class="string">'UNIQUE_CUST_ID_REQD'</span> => <span class="string">'update_existing'</span>,
+    <span class="keyword">default</span> => <span class="string">'escalate'</span>
+  };
+
+  <span class="keyword">return</span> { action, message: errorMessage, code: errorCode };
+};</code></pre>
+
+      <h4 id="js-netsuite-internal">Internal ID mapping</h4>
+      <pre><button class="copy-btn">Copy</button><code><span class="comment">// Modern IdMapper with private fields and arrow functions</span>
+<span class="keyword">class</span> IdMapper {
+  #cache;
+  #ttl = <span class="number">86400</span> * <span class="number">30</span>; <span class="comment">// 30 days</span>
+
+  <span class="keyword">constructor</span>(cache) {
+    <span class="keyword">this</span>.#cache = cache;
+  }
+
+  #key = (system, externalId) => <span class="string">`idmap:${system}:${externalId}`</span>;
+
+  <span class="keyword">async</span> getInternalId(system, externalId) {
+    <span class="keyword">return</span> <span class="keyword">await</span> <span class="keyword">this</span>.#cache.get(<span class="keyword">this</span>.#key(system, externalId));
+  }
+
+  <span class="keyword">async</span> setMapping(system, externalId, internalId) {
+    <span class="keyword">await</span> <span class="keyword">this</span>.#cache.set(<span class="keyword">this</span>.#key(system, externalId), internalId, <span class="string">'EX'</span>, <span class="keyword">this</span>.#ttl);
+  }
+
+  <span class="keyword">async</span> getOrFetch(system, externalId, fetcher) {
+    <span class="comment">// Try cache first, fetch if not found</span>
+    <span class="keyword">const</span> cached = <span class="keyword">await</span> <span class="keyword">this</span>.getInternalId(system, externalId);
+    <span class="keyword">if</span> (cached) <span class="keyword">return</span> cached;
+
+    <span class="comment">// Fetch from source and cache</span>
+    <span class="keyword">const</span> { internalId } = <span class="keyword">await</span> fetcher(externalId);
+    <span class="keyword">await</span> <span class="keyword">this</span>.setMapping(system, externalId, internalId);
+    <span class="keyword">return</span> internalId;
+  }
+}
+
+<span class="comment">// Modern functional approach (factory function)</span>
+<span class="keyword">const</span> createIdMapper = (cache, ttl = <span class="number">86400</span> * <span class="number">30</span>) => ({
+  <span class="keyword">get</span>: (system, externalId) => cache.get(<span class="string">`idmap:${system}:${externalId}`</span>),
+  <span class="keyword">set</span>: (system, externalId, internalId) =>
+    cache.set(<span class="string">`idmap:${system}:${externalId}`</span>, internalId, <span class="string">'EX'</span>, ttl),
+  <span class="keyword">getOrFetch</span>: <span class="keyword">async</span> (system, externalId, fetcher) => {
+    <span class="keyword">const</span> cached = <span class="keyword">await</span> cache.get(<span class="string">`idmap:${system}:${externalId}`</span>);
+    <span class="keyword">if</span> (cached) <span class="keyword">return</span> cached;
+    <span class="keyword">const</span> { internalId } = <span class="keyword">await</span> fetcher(externalId);
+    <span class="keyword">await</span> cache.set(<span class="string">`idmap:${system}:${externalId}`</span>, internalId, <span class="string">'EX'</span>, ttl);
+    <span class="keyword">return</span> internalId;
+  }
+});</code></pre>
+
+      <!-- Cheatsheet -->
+      <h3 id="js-cheatsheet">📋 Quick Reference</h3>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>Pattern</th><th>Use When</th></tr></thead>
+        <tbody>
+          <tr><td><code>await Promise.all()</code></td><td>Fetching multiple records in parallel</td></tr>
+          <tr><td><code>await Promise.allSettled()</code></td><td>Need all results, even if some fail</td></tr>
+          <tr><td><code>for await...of</code></td><td>Processing records sequentially or async generators</td></tr>
+          <tr><td><code>AbortController</code></td><td>Cancelling stale requests</td></tr>
+          <tr><td><code>retry with backoff</code></td><td>Handling rate limits gracefully</td></tr>
+          <tr><td><code>CircuitBreaker</code></td><td>Stopping requests to failing services</td></tr>
+          <tr><td><code>Idempotency key</code></td><td>Preventing duplicate syncs</td></tr>
+          <tr><td><code>Batch processing</code></td><td>Syncing large datasets safely</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <h4 id="js-modern-features">🚀 Modern JS Features Used</h4>
+      <ul>
+        <li><strong>Arrow functions</strong> — Concise syntax, lexical <code>this</code></li>
+        <li><strong>Async/await</strong> — Syntactic sugar over promises</li>
+        <li><strong>Top-level await</strong> — Use <code>await</code> at module top level (ES2022)</li>
+        <li><strong>Private fields</strong> — <code>#field</code> syntax for encapsulation</li>
+        <li><strong>Nullish coalescing</strong> — <code>??</code> vs <code>||</code></li>
+        <li><strong>Optional chaining</strong> — <code>?.</code> for safe property access</li>
+        <li><strong>Array.fromAsync</strong> — Async iterable to array (ES2024)</li>
+        <li><strong>Promise.any</strong> — First fulfilled promise (ES2021)</li>
+        <li><strong>Array.at()</strong> — Negative indexing (ES2022)</li>
+        <li><strong>Object.hasOwn()</strong> — Safer hasOwnProperty (ES2022)</li>
+      </ul>
+
+      <h4 id="js-arrow-patterns">📝 Arrow Function Patterns</h4>
+      <pre><button class="copy-btn">Copy</button><code><span class="comment">// Implicit return (single expression)</span>
+<span class="keyword">const</span> double = (x) => x * <span class="number">2</span>;
+<span class="keyword">const</span> getName = (user) => user.name;
+
+<span class="comment">// Multiple parameters need parentheses</span>
+<span class="keyword">const</span> add = (a, b) => a + b;
+
+<span class="comment">// Object return needs parentheses</span>
+<span class="keyword">const</span> createUser = (name) => ({ name, createdAt: <span class="keyword">new</span> Date() });
+
+<span class="comment">// Async arrow functions</span>
+<span class="keyword">const</span> fetchData = <span class="keyword">async</span> (url) => {
+  <span class="keyword">const</span> res = <span class="keyword">await</span> fetch(url);
+  <span class="keyword">return</span> res.json();
+};
+
+<span class="comment">// Curried functions (modern functional style)</span>
+<span class="keyword">const</span> multiply = (a) => (b) => a * b;
+<span class="keyword">const</span> double = multiply(<span class="number">2</span>);
+<span class="keyword">const</span> six = double(<span class="number">3</span>); <span class="comment">// 6</span></code></pre>
+    </div>
+
+    <footer>
+      Built as a single self-contained HTML file — no build step, no dependencies. Open in any browser.
+    </footer>
   </main>
 </div>
 
 <script>
-  // Smooth scroll offset for sticky sidebar
-  document.querySelectorAll('a[href^="#"]').forEach(link => {
+  // Sidebar toggle
+  const sidebarToggle = document.getElementById('sidebarToggle');
+  const layout = document.getElementById('layout');
+
+  sidebarToggle.addEventListener('click', () => {
+    layout.classList.toggle('sidebar-collapsed');
+    localStorage.setItem('sidebar-collapsed', layout.classList.contains('sidebar-collapsed'));
+  });
+
+  // Restore sidebar state
+  if (localStorage.getItem('sidebar-collapsed') === 'true') {
+    layout.classList.add('sidebar-collapsed');
+  }
+
+  // Section navigation
+  function showSection(sectionId) {
+    document.querySelectorAll('.section-content').forEach(el => {
+      el.classList.remove('active');
+    });
+    document.querySelectorAll('aside nav a').forEach(el => {
+      el.classList.remove('active');
+    });
+
+    const section = document.getElementById(sectionId);
+    if (section) {
+      section.classList.add('active');
+      const navLink = document.querySelector(`aside nav a[data-section="${sectionId}"]`);
+      if (navLink) navLink.classList.add('active');
+    }
+  }
+
+  // Handle nav clicks
+  document.querySelectorAll('aside nav a[href^="#"]').forEach(link => {
     link.addEventListener('click', e => {
-      const id = link.getAttribute('href').slice(1);
-      const el = document.getElementById(id);
-      if (!el) return;
+      const href = link.getAttribute('href');
+      const sectionId = href.slice(1);
+
+      // Don't navigate for coming-soon items
+      if (link.classList.contains('coming-soon')) {
+        e.preventDefault();
+        return;
+      }
+
+      const section = document.getElementById(sectionId);
+      if (!section) return;
+
       e.preventDefault();
-      window.scrollTo({ top: el.offsetTop - 20, behavior: 'smooth' });
-      history.pushState(null, '', '#' + id);
+
+      // If it's a section content, show it
+      if (section.classList.contains('section-content')) {
+        showSection(sectionId);
+      }
+
+      const el = document.getElementById(sectionId);
+      if (el) {
+        window.scrollTo({ top: el.offsetTop - 20, behavior: 'smooth' });
+        history.pushState(null, '', '#' + sectionId);
+      }
     });
   });
+
+  // Handle section card clicks
+  document.querySelectorAll('.section-card').forEach(card => {
+    card.addEventListener('click', e => {
+      const sectionId = card.dataset.section;
+      if (!sectionId) return;
+
+      // Don't navigate for coming-soon
+      if (card.classList.contains('coming-soon')) {
+        e.preventDefault();
+        return;
+      }
+
+      showSection(sectionId);
+    });
+  });
+
+  // Show section from URL hash on load
+  const hash = window.location.hash.slice(1);
+  if (hash && document.getElementById(hash)) {
+    if (document.getElementById(hash).classList.contains('section-content')) {
+      showSection(hash);
+    }
+  }
 
   // Copy buttons
   document.querySelectorAll('pre').forEach(pre => {
@@ -922,24 +1731,7 @@ docker network connect monitoring web</code></pre>
     });
   });
 
-  // Reveal sections on scroll
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.style.opacity = '1';
-        entry.target.style.transform = 'translateY(0)';
-      }
-    });
-  }, { threshold: 0.05, rootMargin: '0px 0px -50px 0px' });
-
-  document.querySelectorAll('section').forEach((s, i) => {
-    s.style.opacity = '0';
-    s.style.transform = 'translateY(12px)';
-    s.style.transition = `opacity 0.6s ease ${Math.min(i * 0.04, 0.4)}s, transform 0.6s ease ${Math.min(i * 0.04, 0.4)}s`;
-    observer.observe(s);
-  });
-
-  // Active nav highlighting
+  // Active nav highlighting on scroll
   const navLinks = document.querySelectorAll('aside nav a[href^="#"]');
   const sectionMap = new Map();
   navLinks.forEach(l => {
@@ -947,19 +1739,22 @@ docker network connect monitoring web</code></pre>
     const el = document.getElementById(id);
     if (el) sectionMap.set(id, l);
   });
-  const navObserver = new IntersectionObserver((entries) => {
+
+  const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       const link = sectionMap.get(entry.target.id);
-      if (!link) return;
+      if (!link || link.classList.contains('coming-soon')) return;
       if (entry.isIntersecting) {
-        navLinks.forEach(l => l.style.background = '');
-        navLinks.forEach(l => l.style.color = '');
-        link.style.background = 'rgba(13, 183, 237, 0.10)';
-        link.style.color = '#0db7ed';
+        navLinks.forEach(l => l.classList.remove('active'));
+        link.classList.add('active');
       }
     });
   }, { rootMargin: '-30% 0px -60% 0px' });
-  sectionMap.forEach((_, id) => navObserver.observe(document.getElementById(id)));
+
+  sectionMap.forEach((_, id) => {
+    const el = document.getElementById(id);
+    if (el) observer.observe(el);
+  });
 </script>
 </body>
 </html>
